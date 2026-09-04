@@ -1,5 +1,3 @@
-
-
 Taller3 explicacion · HTML
 <!DOCTYPE html>
 <html lang="es">
