@@ -1,0 +1,53 @@
+T,Taller Mecanica Avanzada
+C,1001,Andres Perez
+A,XTY-123
+R,R-001,Cambio de Aceite
+P,Aceite 5W30,120000
+P,Filtro de Aceite,25000
+R,R-002,Revision Frenos
+P,Pastillas Delanteras,80000
+P,Liquido de Frenos,35000
+A,ABC-999
+R,R-003,Sincronizacion
+P,Bujias,60000
+P,Filtro de Aire,20000
+P,Filtro de Gasolina,30000
+P,Limpieza Inyectores,80000
+C,1002,Maria Gomez
+A,DEF-456
+R,R-004,Reparacion Suspension
+P,Amortiguadores Delanteros,300000
+P,Bujes de Tijera,50000
+P,Mano de Obra Suspension,150000
+C,1003,Carlos Ramirez
+A,GHI-789
+R,R-005,Sistema Electrico
+P,Bateria 12V,250000
+P,Juego de Fusibles,15000
+A,JKL-012
+R,R-006,Mantenimiento Aire Acondicionado
+P,Carga Gas Refrigerante,90000
+P,Filtro de Cabina,45000
+P,Limpieza Evaporador,60000
+C,1004,Diana Rodriguez
+A,MNO-345
+R,R-007,Cambio Correa Reparticion
+P,Correa de Distribucion,180000
+P,Tensor de Correa,95000
+P,Bomba de Agua,120000
+P,Refrigerante Motor,40000
+P,Mano de Obra Especializada,200000
+C,1005,Luis Fernando Vargas
+A,PQR-678
+R,R-008,Mantenimiento Basico
+P,Plumillas Limpiaparabrisas,35000
+P,Alineacion y Balanceo,60000
+R,R-009,Cambio Llantas Delanteras
+P,Llanta Derecha Rin 15,220000
+P,Llanta Izquierda Rin 15,220000
+P,Valvulas Nuevas,10000
+A,STU-901
+R,R-010,Latoneria y Pintura
+P,Pintura Poliuretano,150000
+P,Materiales Lija y Masilla,45000
+P,Mano de Obra Pintura,250000
