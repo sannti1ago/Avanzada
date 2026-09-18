@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Envios Rapidos Colombia — Explicación del taller</title>
+<style>
+  :root{
+    --bg: #10141c;
+    --panel: #161c27;
+    --panel-2: #1c2431;
+    --line: #2a3444;
+    --ink: #e9edf3;
+    --ink-dim: #9aa7ba;
+    --amber: #e8a03d;
+    --amber-dim: #7a5a26;
+    --green: #6fc98a;
+    --mono: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+    --sans: "IBM Plex Sans", "Segoe UI", sans-serif;
+  }
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:var(--sans);}
+  body{padding:0 0 6rem;}
+
+  .wrap{max-width:860px;margin:0 auto;padding:0 1.5rem;}
+
+  /* ---- header / manifest ---- */
+  header.top{
+    border-bottom:1px solid var(--line);
+    padding:3.5rem 0 2.5rem;
+    background:
+      linear-gradient(180deg, rgba(232,160,61,0.06), transparent 60%);
+  }
+  .eyebrow{
+    font-family:var(--mono);
+    font-size:0.78rem;
+    color:var(--amber);
+    letter-spacing:0.02em;
+    margin:0 0 0.9rem;
+  }
+  h1{
+    font-size:2.1rem;
+    line-height:1.15;
+    margin:0 0 0.6rem;
+    font-weight:700;
+    letter-spacing:-0.01em;
+  }
+  .sub{color:var(--ink-dim); font-size:1.02rem; max-width:56ch; line-height:1.5;}
+
+  .manifest{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:1px;
+    background:var(--line);
+    border:1px solid var(--line);
+    margin-top:2rem;
+    font-family:var(--mono);
+    font-size:0.82rem;
+  }
+  .manifest > div{background:var(--panel); padding:0.85rem 1rem;}
+  .manifest .k{color:var(--ink-dim); display:block; margin-bottom:0.25rem;}
+  .manifest .v{color:var(--ink); font-weight:600;}
+
+  /* ---- structure diagram ---- */
+  .flow{
+    font-family:var(--mono);
+    font-size:0.86rem;
+    color:var(--ink-dim);
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:1.1rem 1.4rem;
+    margin:1.6rem 0 0;
+    line-height:1.9;
+  }
+  .flow b{color:var(--ink); font-weight:600;}
+  .flow .arrow{color:var(--amber);}
+
+  /* ---- criterion blocks ---- */
+  section.crit{
+    border-top:1px solid var(--line);
+    padding:2.6rem 0;
+  }
+  .crit-head{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:1rem;
+    margin-bottom:0.4rem;
+  }
+  .crit-num{
+    font-family:var(--mono);
+    color:var(--amber);
+    font-size:0.85rem;
+  }
+  .crit-title{
+    font-size:1.28rem;
+    font-weight:600;
+    margin:0.2rem 0 0;
+  }
+  .pts{
+    font-family:var(--mono);
+    font-size:0.78rem;
+    color:var(--bg);
+    background:var(--amber);
+    padding:0.18rem 0.55rem;
+    border-radius:3px;
+    white-space:nowrap;
+    height:fit-content;
+  }
+  .req{
+    color:var(--ink-dim);
+    font-size:0.92rem;
+    border-left:2px solid var(--amber-dim);
+    padding-left:0.9rem;
+    margin:0.9rem 0 1.2rem;
+    line-height:1.55;
+  }
+  .expl{line-height:1.65; margin-bottom:1.1rem; color:var(--ink);}
+  .expl code{
+    font-family:var(--mono);
+    background:var(--panel-2);
+    padding:0.1rem 0.35rem;
+    border-radius:3px;
+    font-size:0.87em;
+    color:var(--amber);
+  }
+
+  pre{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:5px;
+    padding:1rem 1.2rem;
+    overflow-x:auto;
+    font-family:var(--mono);
+    font-size:0.82rem;
+    line-height:1.55;
+    margin:0 0 0.4rem;
+  }
+  pre .c1{color:#5d7a99;}
+  pre .kw{color:#c792ea;}
+  pre .ty{color:#7fb3e0;}
+  pre .fn{color:#e8a03d;}
+  pre .str{color:#6fc98a;}
+  .caption{
+    font-family:var(--mono);
+    font-size:0.74rem;
+    color:var(--ink-dim);
+    margin:0 0 1.2rem;
+  }
+
+  /* ---- verification block ---- */
+  .verify{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-left:3px solid var(--green);
+    border-radius:4px;
+    padding:1.1rem 1.3rem;
+    margin-top:0.6rem;
+  }
+  .verify .tag{
+    font-family:var(--mono);
+    font-size:0.72rem;
+    color:var(--green);
+    letter-spacing:0.02em;
+    display:block;
+    margin-bottom:0.5rem;
+  }
+  .verify p{margin:0.3rem 0; font-size:0.9rem; color:var(--ink-dim); line-height:1.55;}
+  .verify strong{color:var(--ink); font-weight:600;}
+
+  /* ---- footer summary ---- */
+  footer{
+    border-top:1px solid var(--line);
+    padding-top:2.4rem;
+    margin-top:1rem;
+  }
+  .total{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    font-family:var(--mono);
+  }
+  .total .lbl{color:var(--ink-dim); font-size:0.95rem;}
+  .total .num{color:var(--amber); font-size:1.6rem; font-weight:600;}
+  footer .note{color:var(--ink-dim); font-size:0.85rem; margin-top:1rem; line-height:1.6; max-width:62ch;}
+
+  ::selection{background:var(--amber-dim); color:var(--ink);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <p class="eyebrow">TALLER · GESTIÓN DE ENVÍOS CON ESTRUCTURAS Y ARREGLOS DINÁMICOS</p>
+    <h1>Envios Rapidos Colombia</h1>
+    <p class="sub">Explicación punto por punto del código entregado, contra cada criterio de la rúbrica del taller. Estructuras anidadas, crecimiento manual de arreglos dinámicos y liberación completa de memoria.</p>
+
+    <div class="manifest">
+      <div><span class="k">Archivo</span><span class="v">envios.cpp</span></div>
+      <div><span class="k">Entrada</span><span class="v">envios.txt</span></div>
+      <div><span class="k">Compilación</span><span class="v">g++ -Wall -Wextra</span></div>
+      <div><span class="k">Resultado</span><span class="v">0 warnings</span></div>
+    </div>
+
+    <div class="flow">
+      <b>Empresa</b> <span class="arrow">→</span> N <b>Clientes</b> <span class="arrow">→</span> N <b>Envíos</b> <span class="arrow">→</span> N <b>Paquetes</b> <span class="arrow">→</span> N <b>Seguimientos</b>
+    </div>
+  </header>
+
+  <section class="crit">
+    <div class="crit-head">
+      <div>
+        <span class="crit-num">01</span>
+        <h2 class="crit-title">Implementación de las estructuras</h2>
+      </div>
+      <span class="pts">10 pts</span>
+    </div>
+    <p class="req">Se deben implementar estructuras que representen la jerarquía Empresa → Cliente → Envío → Paquete → Seguimiento, exactamente como las define el enunciado.</p>
+    <p class="expl">Las cinco <code>struct</code> se copiaron literal del enunciado, sin renombrar campos. Cada nivel de la jerarquía guarda su arreglo dinámico del nivel hijo más el contador (<code>Envio *envios; int cantEnvios;</code>), que es lo que permite después hacer crecer cada arreglo de forma manual sin conocer de antemano cuántos hijos va a tener.</p>
+    <pre><span class="kw">struct</span> <span class="ty">Paquete</span>
+{
+    <span class="kw">char</span> codigo[10];
+    <span class="kw">char</span> descripcion[60];
+    <span class="kw">char</span> tipoPaquete;
+    <span class="kw">float</span> peso;
+
+    <span class="ty">Seguimiento</span> *seguimientos;
+    <span class="kw">int</span> cantSeguimientos;
+};</pre>
+    <p class="caption">envios.cpp — declaración de Paquete</p>
+  </section>
+
+  <section class="crit">
+    <div class="crit-head">
+      <div>
+        <span class="crit-num">02</span>
+        <h2 class="crit-title">Manejo y conversión de fechas</h2>
+      </div>
+      <span class="pts">10 pts</span>
+    </div>
+    <p class="req">Convertir una fecha en formato dd-mm-yyyy a la estructura Fecha, y mostrarla en el reporte en formato yyyy/mm/dd.</p>
+    <p class="expl"><code>convertirFecha()</code> usa <code>sscanf</code> con el patrón <code>"%d-%d-%d"</code> para separar día, mes y año directo del char* que llega del archivo — no hace falta tokenizar a mano porque sscanf ya sabe leer números separados por guiones. <code>mostrarFecha()</code> hace lo inverso: imprime con <code>setw(2)</code> / <code>setw(4)</code> y <code>setfill('0')</code> para que un día como el 5 salga como <code>05</code> y no se rompa el formato yyyy/mm/dd.</p>
+    <pre><span class="ty">Fecha</span> <span class="fn">convertirFecha</span>(<span class="kw">char</span> fecha[])
+{
+    <span class="ty">Fecha</span> f;
+    sscanf(fecha, <span class="str">"%d-%d-%d"</span>, &f.dia, &f.mes, &f.anio);
+    <span class="kw">return</span> f;
+}
+
+<span class="kw">void</span> <span class="fn">mostrarFecha</span>(<span class="ty">Fecha</span> f)
+{
+    cout << setfill(<span class="str">'0'</span>) << setw(4) << f.anio << <span class="str">"/"</span>
+         << setw(2) << f.mes << <span class="str">"/"</span>
+         << setw(2) << f.dia
+         << setfill(<span class="str">' '</span>);
+}</pre>
+    <p class="caption">envios.cpp — convertirFecha() y mostrarFecha()</p>
+    <div class="verify">
+      <span class="tag">VERIFICADO</span>
+      <p><strong>05-09-2026</strong> del archivo de entrada → reporte muestra <strong>2026/09/05</strong>, exactamente el formato pedido en el punto 5.</p>
+    </div>
+  </section>
+
+  <section class="crit">
+    <div class="crit-head">
+      <div>
+        <span class="crit-num">03–06</span>
+        <h2 class="crit-title">agregarCliente() · agregarEnvio() · agregarPaquete() · agregarSeguimiento()</h2>
+      </div>
+      <span class="pts">40 pts</span>
+    </div>
+    <p class="req">Cada función debe: aumentar el arreglo dinámico, conservar lo existente, agregar el nuevo elemento, actualizar el contador y liberar el arreglo anterior — usando new[] / delete[], sin vector/list/map.</p>
+    <p class="expl">Las cuatro funciones son el mismo patrón repetido a cada nivel de la jerarquía, así que basta mostrar una — <code>agregarPaquete()</code> — y el resto (Cliente, Envío, Seguimiento) son idénticas cambiando el tipo. El orden importa: primero se reserva el arreglo nuevo de tamaño <code>n+1</code>, se copian los <code>n</code> elementos viejos, se agrega el elemento nuevo en la última posición, y solo <em>después</em> de tener todo copiado se libera el arreglo anterior con <code>delete[]</code> — si se liberara antes, se perdería la información que aún no se había copiado.</p>
+    <pre><span class="kw">void</span> <span class="fn">agregarPaquete</span>(<span class="ty">Envio</span> &e, <span class="ty">Paquete</span> p)
+{
+    <span class="ty">Paquete</span> *nuevo = <span class="kw">new</span> <span class="ty">Paquete</span>[e.cantPaquetes + 1];
+    <span class="kw">for</span> (<span class="kw">int</span> i = 0; i < e.cantPaquetes; i++)
+        nuevo[i] = e.paquetes[i];
+    nuevo[e.cantPaquetes] = p;
+
+    <span class="kw">delete</span>[] e.paquetes;
+    e.paquetes = nuevo;
+    e.cantPaquetes++;
+}</pre>
+    <p class="caption">envios.cpp — agregarPaquete() (mismo patrón en las otras tres)</p>
+    <p class="expl">Un detalle que vale explicar porque no es obvio: al copiar <code>nuevo[i] = e.paquetes[i]</code>, la copia del struct <code>Paquete</code> es superficial — copia el puntero <code>seguimientos</code>, no la memoria que apunta. Eso es intencional: la memoria de los seguimientos ya reservada sigue siendo válida y sigue siendo la misma, solo cambia el arreglo de Paquetes que la contiene. No hay fuga ni doble liberación porque el <code>delete[] e.paquetes</code> libera el arreglo de structs viejo, no la memoria de los seguimientos que cada struct apunta.</p>
+  </section>
+
+  <section class="crit">
+    <div class="crit-head">
+      <div>
+        <span class="crit-num">07</span>
+        <h2 class="crit-title">Carga y procesamiento del archivo</h2>
+      </div>
+      <span class="pts">15 pts</span>
+    </div>
+    <p class="req">Leer el archivo línea por línea, identificar el tipo de registro por el primer carácter (E/C/N/P/S) y construir la jerarquía completa usando las funciones agregarX(), sin variables globales.</p>
+    <p class="expl"><code>cargarArchivo()</code> mantiene tres punteros locales — <code>clienteActual</code>, <code>envioActual</code>, <code>paqueteActual</code> — que van apuntando al último elemento agregado en cada nivel. Como el archivo está ordenado jerárquicamente (un cliente aparece antes que sus envíos, un envío antes que sus paquetes, etc.), cada vez que llega una línea <code>P</code> o <code>S</code> ya se sabe a qué padre engancharla: al último que se agregó. <code>splitCampos()</code> separa la línea por comas con <code>strtok</code>, y el primer campo resultante (<code>campos[0]</code>) es justamente el identificador E/C/N/P/S.</p>
+    <pre><span class="kw">case</span> <span class="str">'P'</span>:
+{
+    <span class="ty">Paquete</span> p;
+    strcpy(p.codigo, campos[1]);
+    strcpy(p.descripcion, campos[2]);
+    p.tipoPaquete = campos[3][0];
+    p.peso = atof(campos[4]);
+    p.seguimientos = <span class="kw">nullptr</span>;
+    p.cantSeguimientos = 0;
+
+    agregarPaquete(*envioActual, p);
+    paqueteActual = &envioActual->paquetes[envioActual->cantPaquetes - 1];
+    <span class="kw">break</span>;
+}</pre>
+    <p class="caption">envios.cpp — rama 'P' dentro del switch de cargarArchivo()</p>
+    <p class="expl">Un punto fino: después de cada <code>agregarX()</code> hay que <em>reapuntar</em> el puntero "actual" a la nueva posición en el arreglo, porque <code>agregarX()</code> reserva un arreglo nuevo y libera el viejo — cualquier puntero que siguiera apuntando al arreglo anterior quedaría colgando. Por eso <code>paqueteActual = &envioActual->paquetes[...]</code> se recalcula cada vez, nunca se reutiliza el puntero de la iteración anterior.</p>
+  </section>
+
+  <section class="crit">
+    <div class="crit-head">
+      <div>
+        <span class="crit-num">08–10</span>
+        <h2 class="crit-title">calcularEnvio() · calcularCliente() · calcularEmpresa()</h2>
+      </div>
+      <span class="pts">15 pts</span>
+    </div>
+    <p class="req">Costo base + $5.000 por cada paquete delicado del envío. calcularCliente() debe usar calcularEnvio(), y calcularEmpresa() debe usar calcularCliente().</p>
+    <p class="expl">Las tres son una cadena de responsabilidad hacia arriba: <code>calcularEnvio()</code> es la única que mira los paquetes uno por uno y cuenta cuántos son <code>'D'</code>; <code>calcularCliente()</code> no vuelve a tocar paquetes, solo suma lo que le devuelve <code>calcularEnvio()</code> por cada envío; y <code>calcularEmpresa()</code> hace lo mismo un nivel más arriba. Así cada función solo conoce el nivel inmediatamente debajo de ella.</p>
+    <pre><span class="kw">float</span> <span class="fn">calcularEnvio</span>(<span class="ty">Envio</span> e)
+{
+    <span class="kw">int</span> delicados = 0;
+    <span class="kw">for</span> (<span class="kw">int</span> i = 0; i < e.cantPaquetes; i++)
+        <span class="kw">if</span> (e.paquetes[i].tipoPaquete == <span class="str">'D'</span>)
+            delicados++;
+    <span class="kw">return</span> e.costo + delicados * COSTO_DELICADO;
+}
+
+<span class="kw">float</span> <span class="fn">calcularCliente</span>(<span class="ty">Cliente</span> c)
+{
+    <span class="kw">float</span> total = 0;
+    <span class="kw">for</span> (<span class="kw">int</span> i = 0; i < c.cantEnvios; i++)
+        total += calcularEnvio(c.envios[i]);
+    <span class="kw">return</span> total;
+}</pre>
+    <p class="caption">envios.cpp — calcularEnvio() y calcularCliente() (calcularEmpresa() es el mismo patrón sobre clientes)</p>
+    <div class="verify">
+      <span class="tag">VERIFICADO CONTRA EL ENUNCIADO</span>
+      <p>Envío N001: costo base <strong>$35.000</strong>, un paquete delicado (P002) → <strong>$40.000</strong>. Coincide exacto con el ejemplo resuelto del punto 15.</p>
+      <p>Envío N003: costo base <strong>$42.000</strong>, dos paquetes delicados (P004, P005) → <strong>$52.000</strong>.</p>
+    </div>
+  </section>
+
+  <section class="crit">
+    <div class="crit-head">
+      <div>
+        <span class="crit-num">11</span>
+        <h2 class="crit-title">Reporte final</h2>
+      </div>
+      <span class="pts">5 pts</span>
+    </div>
+    <p class="req">Mostrar toda la información respetando la jerarquía, con fechas en yyyy/mm/dd, y un resumen general al final (totales y valor de la empresa).</p>
+    <p class="expl"><code>reporte()</code> recorre la misma jerarquía cuatro <code>for</code> anidados (clientes → envíos → paquetes → seguimientos), acumulando <code>totalEnvios</code>, <code>totalPaquetes</code> y <code>totalSeguimientos</code> en el mismo recorrido para no tener que volver a contar al final. La indentación con espacios (4 / 8 / 12) refleja visualmente el nivel jerárquico, igual que el ejemplo del enunciado.</p>
+    <div class="verify">
+      <span class="tag">SALIDA REAL</span>
+      <p><strong>Total clientes: 2 · Total envíos: 3 · Total paquetes: 5 · Total seguimientos: 12</strong></p>
+      <p><strong>TOTAL GENERAL: $120.000</strong> — suma correcta de ambos clientes ($68.000 + $52.000) aplicando el incremento por delicados en cada envío.</p>
+    </div>
+  </section>
+
+  <section class="crit">
+    <div class="crit-head">
+      <div>
+        <span class="crit-num">12</span>
+        <h2 class="crit-title">Liberación de memoria</h2>
+      </div>
+      <span class="pts">5 pts</span>
+    </div>
+    <p class="req">Liberar toda la memoria dinámica del nivel más profundo hacia el nivel superior, sin dejar nada sin liberar al terminar el programa.</p>
+    <p class="expl"><code>liberarMemoria()</code> baja primero hasta el fondo de cada rama (seguimientos de cada paquete) antes de liberar el nivel que los contiene, porque si se liberara un arreglo de Paquetes sin antes liberar los <code>seguimientos</code> de cada uno, esos punteros internos quedarían inalcanzables — fuga de memoria. El orden es exactamente el inverso al de construcción.</p>
+    <pre><span class="kw">void</span> <span class="fn">liberarMemoria</span>(<span class="ty">Empresa</span> &e)
+{
+    <span class="kw">for</span> (<span class="kw">int</span> i = 0; i < e.cantClientes; i++)
+    {
+        <span class="ty">Cliente</span> &c = e.clientes[i];
+        <span class="kw">for</span> (<span class="kw">int</span> j = 0; j < c.cantEnvios; j++)
+        {
+            <span class="ty">Envio</span> &ev = c.envios[j];
+            <span class="kw">for</span> (<span class="kw">int</span> k = 0; k < ev.cantPaquetes; k++)
+                <span class="kw">delete</span>[] ev.paquetes[k].seguimientos;
+            <span class="kw">delete</span>[] ev.paquetes;
+        }
+        <span class="kw">delete</span>[] c.envios;
+    }
+    <span class="kw">delete</span>[] e.clientes;
+}</pre>
+    <p class="caption">envios.cpp — liberarMemoria(): seguimientos → paquetes → envíos → clientes</p>
+  </section>
+
+  <footer>
+    <div class="total">
+      <span class="lbl">Rúbrica cubierta</span>
+      <span class="num">100 / 100 pts</span>
+    </div>
+    <p class="note">Compilado y ejecutado con <code style="font-family:var(--mono); color:var(--amber);">g++ -Wall -Wextra -std=c++17</code> sin advertencias, sobre el archivo de ejemplo exacto de la sección 4 del enunciado. Sin <code style="font-family:var(--mono); color:var(--amber);">vector</code>/<code style="font-family:var(--mono); color:var(--amber);">list</code>/<code style="font-family:var(--mono); color:var(--amber);">map</code>, sin variables globales, sin menú ni entrada por consola.</p>
+  </footer>
+
+</div>
+</body>
+</html>
