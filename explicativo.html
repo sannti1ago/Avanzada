@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Taller Mecánico — Explicativo</title>
+<style>
+  :root{
+    --bg:#0f1115;
+    --panel:#161920;
+    --line:#262b35;
+    --text:#e6e8ec;
+    --muted:#9aa3af;
+    --accent:#7dd3fc;
+    --accent2:#a78bfa;
+    --code-bg:#0b0d11;
+    --ok:#4ade80;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Segoe UI',Roboto,-apple-system,sans-serif;
+    line-height:1.55;
+  }
+  header{
+    padding:48px 24px 32px;
+    max-width:900px;
+    margin:0 auto;
+    border-bottom:1px solid var(--line);
+  }
+  header h1{
+    font-size:1.9rem;
+    margin:0 0 8px;
+    letter-spacing:-0.01em;
+  }
+  header p{color:var(--muted); margin:4px 0;}
+  main{max-width:900px; margin:0 auto; padding:32px 24px 80px;}
+  section{
+    margin-bottom:40px;
+    padding:24px;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:10px;
+  }
+  section h2{
+    margin:0 0 4px;
+    font-size:1.15rem;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .badge{
+    font-size:0.7rem;
+    font-weight:600;
+    color:var(--bg);
+    background:var(--accent);
+    padding:2px 9px;
+    border-radius:999px;
+    white-space:nowrap;
+  }
+  .subtitle{color:var(--muted); font-size:0.85rem; margin:0 0 18px;}
+  blockquote{
+    margin:0 0 16px;
+    padding:10px 16px;
+    border-left:3px solid var(--accent2);
+    background:#1a1d26;
+    color:#c9cdd6;
+    font-size:0.9rem;
+    font-style:italic;
+    border-radius:0 6px 6px 0;
+  }
+  h4{
+    margin:18px 0 8px;
+    font-size:0.85rem;
+    text-transform:uppercase;
+    letter-spacing:.04em;
+    color:var(--accent);
+  }
+  pre{
+    background:var(--code-bg);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:14px 16px;
+    overflow-x:auto;
+    font-size:0.83rem;
+    margin:0 0 14px;
+  }
+  code{
+    font-family:'Fira Code','Consolas',monospace;
+  }
+  .why{
+    background:#12151b;
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:12px 16px;
+    font-size:0.9rem;
+    color:#d4d8de;
+  }
+  .why b{color:var(--ok);}
+  .fixnote{
+    margin-top:14px;
+    padding:12px 16px;
+    background:#241a12;
+    border:1px solid #4a3620;
+    border-radius:8px;
+    font-size:0.87rem;
+    color:#f0c896;
+  }
+  .fixnote b{color:#ffb454;}
+  .toc{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:6px 20px;
+    font-size:0.85rem;
+    margin-top:20px;
+  }
+  .toc a{color:var(--accent); text-decoration:none;}
+  .toc a:hover{text-decoration:underline;}
+  .flow{
+    font-family:'Fira Code',monospace;
+    font-size:0.85rem;
+    color:var(--muted);
+    white-space:pre;
+    background:var(--code-bg);
+    padding:14px 16px;
+    border-radius:8px;
+    border:1px solid var(--line);
+  }
+  .total-row{
+    display:flex;
+    justify-content:space-between;
+    padding-top:16px;
+    margin-top:24px;
+    border-top:1px solid var(--line);
+    font-size:0.85rem;
+    color:var(--muted);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Taller Mecánico — Estructuras y Arreglos Dinámicos</h1>
+  <p>Explicativo punto por punto contra el enunciado y la rúbrica de calificación.</p>
+  <p>Archivo final: <code>taller.cpp</code> · Datos: <code>taller.txt</code></p>
+  <div class="toc">
+    <a href="#estructuras">1. Estructuras — 10 pts</a>
+    <a href="#agregarCliente">2. agregarCliente() — 12 pts</a>
+    <a href="#agregarCarro">3. agregarCarro() — 10 pts</a>
+    <a href="#agregarTrabajo">4. agregarTrabajo() — 10 pts</a>
+    <a href="#agregarParte">5. agregarParte() — 10 pts</a>
+    <a href="#carga">6. Carga del archivo — 20 pts</a>
+    <a href="#calcTrabajo">7. calcularTrabajo() — 8 pts</a>
+    <a href="#calcCarro">8. calcularCarro() — 5 pts</a>
+    <a href="#calcCliente">9. calcularCliente() — 5 pts</a>
+    <a href="#reporte">10. Reporte final — 10 pts</a>
+    <a href="#liberar">11. liberarMemoria() — 10 pts</a>
+  </div>
+</header>
+
+<main>
+
+<section id="estructuras">
+  <h2>1. Estructuras jerárquicas <span class="badge">10 pts</span></h2>
+  <p class="subtitle">Criterio: implementa Parte, Trabajo, Carro, Cliente y Taller, incluyendo los punteros a arreglos dinámicos y sus cantidades.</p>
+  <blockquote>"Taller → N Clientes → N Carros → N Trabajos → N Partes"</blockquote>
+  <h4>Código</h4>
+  <pre><code>struct Parte    { char codigo[10]; char nombre[40]; float valor; };
+struct Trabajo  { char codigo[10]; char descripcion[60]; Parte *partes; int cantPartes; };
+struct Carro    { char placa[10];  char marca[30]; char modelo[20]; Trabajo *trabajos; int cantTrabajos; };
+struct Cliente  { char cedula[20]; char nombre[60]; Carro *carros; int cantCarros; };
+struct Taller   { char nombre[60]; Cliente *clientes; int cantClientes; };</code></pre>
+  <div class="why">Copia literal de los structs sugeridos: cada nivel guarda un <b>puntero al arreglo dinámico del nivel hijo</b> más un contador (<code>cant...</code>) que lleva el tamaño real ocupado. Sin STL — el crecimiento de cada arreglo se hace a mano en las funciones <code>agregar...()</code>.</div>
+</section>
+
+<section id="agregarCliente">
+  <h2>2. agregarCliente() <span class="badge">12 pts</span></h2>
+  <p class="subtitle">Criterio: crea nuevo arreglo dinámico, copia los existentes, agrega el nuevo, actualiza <code>cantClientes</code>, libera el arreglo anterior.</p>
+  <blockquote>"void agregarCliente(Taller &amp;t, Cliente c); — Debe aumentar dinámicamente el arreglo de clientes del taller, copiar los clientes existentes, agregar el nuevo cliente y liberar el arreglo anterior."</blockquote>
+  <h4>Código</h4>
+  <pre><code>void agregarCliente(Taller &t, Cliente c)
+{
+    Cliente *nuevoArreglo = new Cliente[t.cantClientes + 1];
+
+    for (int i = 0; i < t.cantClientes; i++)
+        nuevoArreglo[i] = t.clientes[i];
+
+    nuevoArreglo[t.cantClientes] = c;
+
+    if (t.clientes != nullptr)
+        delete[] t.clientes;
+
+    t.clientes = nuevoArreglo;
+    t.cantClientes++;
+}</code></pre>
+  <div class="why">Cinco pasos exigidos por el enunciado, en orden: <b>(1)</b> reservar arreglo de tamaño <code>n+1</code>, <b>(2)</b> copiar los <code>n</code> existentes, <b>(3)</b> escribir el nuevo en la última posición, <b>(4)</b> liberar el arreglo viejo (con chequeo de <code>nullptr</code> para la primera llamada, cuando <code>clientes</code> aún no apunta a nada), <b>(5)</b> reemplazar el puntero y aumentar el contador. <code>Taller &amp;t</code> por referencia porque hay que modificar el taller original, no una copia.</div>
+</section>
+
+<section id="agregarCarro">
+  <h2>3. agregarCarro() <span class="badge">10 pts</span></h2>
+  <p class="subtitle">Criterio: mismo patrón que agregarCliente, un nivel abajo.</p>
+  <blockquote>"void agregarCarro(Cliente &amp;c, Carro a); — Debe aumentar dinámicamente el arreglo de carros del cliente."</blockquote>
+  <pre><code>void agregarCarro(Cliente &c, Carro a)
+{
+    Carro *nuevoArreglo = new Carro[c.cantCarros + 1];
+    for (int i = 0; i < c.cantCarros; i++)
+        nuevoArreglo[i] = c.carros[i];
+    nuevoArreglo[c.cantCarros] = a;
+    if (c.carros != nullptr) delete[] c.carros;
+    c.carros = nuevoArreglo;
+    c.cantCarros++;
+}</code></pre>
+  <div class="why">Idéntico patrón que <code>agregarCliente</code>, pero operando sobre <code>Cliente &amp;c</code>: el arreglo que crece es <code>carros</code>, no <code>clientes</code>. Repetir el mismo patrón en cada nivel es intencional — así el crecimiento manual es consistente en toda la jerarquía.</div>
+</section>
+
+<section id="agregarTrabajo">
+  <h2>4. agregarTrabajo() <span class="badge">10 pts</span></h2>
+  <blockquote>"void agregarTrabajo(Carro &amp;a, Trabajo t); — Debe aumentar dinámicamente el arreglo de trabajos del carro."</blockquote>
+  <pre><code>void agregarTrabajo(Carro &a, Trabajo t)
+{
+    Trabajo *nuevoArreglo = new Trabajo[a.cantTrabajos + 1];
+    for (int i = 0; i < a.cantTrabajos; i++)
+        nuevoArreglo[i] = a.trabajos[i];
+    nuevoArreglo[a.cantTrabajos] = t;
+    if (a.trabajos != nullptr) delete[] a.trabajos;
+    a.trabajos = nuevoArreglo;
+    a.cantTrabajos++;
+}</code></pre>
+  <div class="why">Mismo patrón sobre <code>Carro &amp;a</code>. Nota de nombres: el parámetro del carro se llama <code>a</code> (de "automóvil"), copiando la firma exacta del enunciado — así el nombre del parámetro nunca choca con el tipo <code>Trabajo t</code>.</div>
+</section>
+
+<section id="agregarParte">
+  <h2>5. agregarParte() <span class="badge">10 pts</span></h2>
+  <blockquote>"void agregarParte(Trabajo &amp;t, Parte p); — Debe aumentar dinámicamente el arreglo de partes del trabajo."</blockquote>
+  <pre><code>void agregarParte(Trabajo &t, Parte p)
+{
+    Parte *nuevoArreglo = new Parte[t.cantPartes + 1];
+    for (int i = 0; i < t.cantPartes; i++)
+        nuevoArreglo[i] = t.partes[i];
+    nuevoArreglo[t.cantPartes] = p;
+    if (t.partes != nullptr) delete[] t.partes;
+    t.partes = nuevoArreglo;
+    t.cantPartes++;
+}</code></pre>
+  <div class="why">Nivel más profundo de la jerarquía — mismo patrón, sobre <code>Trabajo &amp;t</code>. Con esto ya están las 4 funciones de "crecimiento manual" pedidas por las restricciones ("Las funciones de agregar deberán realizar el crecimiento manual de los arreglos").</div>
+</section>
+
+<section id="carga">
+  <h2>6. Carga del archivo <span class="badge">20 pts</span></h2>
+  <p class="subtitle">Criterio más pesado de la rúbrica: abrir y leer línea por línea, identificar T/C/A/R/P, extraer campos separados por comas, construir la jerarquía con las funciones agregar...().</p>
+  <blockquote>"La función cargarArchivo deberá mantener el contexto de los últimos elementos leídos. [...] cuando se lea una línea C se agregará un cliente al taller; cuando se lea una línea A se agregará un carro al cliente actual; una línea R agregará un trabajo al carro actual y una línea P agregará una parte al trabajo actual."</blockquote>
+  <h4>Firma exacta</h4>
+  <pre><code>void cargarArchivo(Taller &t)
+{
+    const string rutaArchivo = "taller.txt";
+    ifstream archivo(rutaArchivo.c_str());
+    ...</code></pre>
+  <div class="fixnote"><b>Corrección aplicada:</b> la versión previa tenía <code>cargarArchivo(Taller &amp;t, const string &amp;rutaArchivo)</code>, con el nombre del archivo como segundo parámetro. El enunciado pide exactamente <code>void cargarArchivo(Taller &amp;t);</code> — sin parámetro extra. Se movió <code>"taller.txt"</code> adentro de la función como constante local, que es justo lo que exige la restricción #9: <i>"El método main [...] no debe solicitar ningún dato por consola"</i> — el nombre del archivo no puede depender de un argumento externo, tiene que estar fijo en el código.</div>
+  <h4>Mantener el contexto (índices del último elemento leído)</h4>
+  <pre><code>int idxClienteActual = -1;
+int idxCarroActual = -1;
+int idxTrabajoActual = -1;
+
+while (getline(archivo, linea)) {
+    ...
+    char tipo = campos[0][0];
+
+    if (tipo == 'C' && n >= 3) {
+        Cliente nuevoCliente = crearCliente(campos[1], campos[2]);
+        agregarCliente(t, nuevoCliente);
+        idxClienteActual = t.cantClientes - 1;   // <- nuevo "cliente actual"
+        idxCarroActual = -1;
+        idxTrabajoActual = -1;
+    }
+    else if (tipo == 'A' && n >= 4) {
+        Carro nuevoCarro = crearCarro(campos[1], campos[2], campos[3]);
+        Cliente &clienteActual = t.clientes[idxClienteActual];
+        agregarCarro(clienteActual, nuevoCarro);
+        idxCarroActual = clienteActual.cantCarros - 1;
+        idxTrabajoActual = -1;
+    }
+    ...</code></pre>
+  <div class="why">"Mantener el contexto" se traduce en 3 índices (<code>idxClienteActual</code>, <code>idxCarroActual</code>, <code>idxTrabajoActual</code>) que apuntan a la última posición agregada en cada nivel. Al leer <code>C</code> se reinician <code>idxCarroActual</code> e <code>idxTrabajoActual</code> a <code>-1</code> porque ese cliente nuevo todavía no tiene carros — evita que una línea <code>R</code> mal ubicada en el archivo termine enganchada al carro de un cliente anterior.</div>
+  <h4>Separar por comas y detectar el tipo</h4>
+  <pre><code>int separarPorComas(const string &linea, string campos[], int maxCampos) {
+    int cantidad = 0;
+    stringstream ss(linea);
+    string campo;
+    while (cantidad < maxCampos && getline(ss, campo, ',')) {
+        campos[cantidad] = campo;
+        cantidad++;
+    }
+    return cantidad;
+}
+...
+char tipo = campos[0][0];   // primer caracter: 'T','C','A','R' o 'P'</code></pre>
+  <div class="why">Se usa <code>stringstream</code> con <code>getline(ss, campo, ',')</code> para partir la línea por comas sin tocar STL de contenedores (no es <code>vector</code>/<code>list</code>/<code>map</code>). <code>campos[0][0]</code> — el primer carácter del primer campo — es la letra que identifica el tipo de registro, tal como lo define la tabla del enunciado (T=Taller, C=Cliente, A=Automóvil, R=Trabajo, P=Parte).</div>
+</section>
+
+<section id="calcTrabajo">
+  <h2>7. calcularTrabajo() <span class="badge">8 pts</span></h2>
+  <blockquote>"float calcularTrabajo(Trabajo t); [...] total = sumaPartes × 1.19."</blockquote>
+  <pre><code>float calcularTrabajo(Trabajo t)
+{
+    float sumaPartes = 0.0f;
+    for (int i = 0; i < t.cantPartes; i++)
+        sumaPartes += t.partes[i].valor;
+    return sumaPartes * 1.19f;
+}</code></pre>
+  <div class="why">Recorre <code>partes[]</code>, suma <code>valor</code>, y al final multiplica por <code>1.19f</code> (el sufijo <code>f</code> evita que el literal se interprete como <code>double</code> y fuerce una conversión implícita). Ejemplo del enunciado: 250.000 + 120.000 = 370.000 × 1.19 = 440.300 — el programa da $440300.03, la diferencia de centavos es precisión propia de <code>float</code> (así está tipado <code>valor</code> en el struct <code>Parte</code>), no un error de lógica.</div>
+</section>
+
+<section id="calcCarro">
+  <h2>8. calcularCarro() <span class="badge">5 pts</span></h2>
+  <blockquote>"float calcularCarro(Carro c); — Debe sumar el valor de todos los trabajos del carro."</blockquote>
+  <pre><code>float calcularCarro(Carro c)
+{
+    float total = 0.0f;
+    for (int i = 0; i < c.cantTrabajos; i++)
+        total += calcularTrabajo(c.trabajos[i]);
+    return total;
+}</code></pre>
+  <div class="why">La rúbrica exige explícitamente <b>reutilizar</b> <code>calcularTrabajo()</code> dentro de este bucle, en vez de recalcular sumas de partes a mano — así cada nivel de la jerarquía delega el cálculo al nivel inmediatamente inferior.</div>
+</section>
+
+<section id="calcCliente">
+  <h2>9. calcularCliente() <span class="badge">5 pts</span></h2>
+  <blockquote>"float calcularCliente(Cliente c); — Debe sumar el valor de todos los carros del cliente."</blockquote>
+  <pre><code>float calcularCliente(Cliente c)
+{
+    float total = 0.0f;
+    for (int i = 0; i < c.cantCarros; i++)
+        total += calcularCarro(c.carros[i]);
+    return total;
+}</code></pre>
+  <div class="why">Misma idea: delega en <code>calcularCarro()</code>. Con esto queda la cadena completa <code>calcularTrabajo → calcularCarro → calcularCliente</code>, y el total del taller se arma sumando <code>calcularCliente()</code> de cada cliente directamente en <code>reporte()</code>.</div>
+</section>
+
+<section id="reporte">
+  <h2>10. Reporte final <span class="badge">10 pts</span></h2>
+  <blockquote>"Debe mostrar todos los clientes, sus carros, trabajos, partes y valores, además del total de cada carro, cliente y del taller."</blockquote>
+  <pre><code>void reporte(Taller t)
+{
+    float totalTaller = 0.0f;
+    for (int i = 0; i < t.cantClientes; i++) {
+        Cliente &cliente = t.clientes[i];
+        for (int j = 0; j < cliente.cantCarros; j++) {
+            Carro &carro = cliente.carros[j];
+            for (int k = 0; k < carro.cantTrabajos; k++) {
+                Trabajo &trabajo = carro.trabajos[k];
+                for (int m = 0; m < trabajo.cantPartes; m++) { ... }
+                float totalTrabajo = calcularTrabajo(trabajo);
+                ...
+            }
+            float totalCarro = calcularCarro(carro);
+            ...
+        }
+        float totalCliente = calcularCliente(cliente);
+        totalTaller += totalCliente;
+    }
+    cout << "TOTAL GENERAL DEL TALLER: $" << formatoMoneda(totalTaller);
+}</code></pre>
+  <div class="why">Cuatro <code>for</code> anidados que recorren exactamente la jerarquía Taller→Cliente→Carro→Trabajo→Parte, imprimiendo cada nivel y su subtotal en el punto donde ya se conoce (parte → nombre y valor; trabajo → <code>calcularTrabajo()</code>; carro → <code>calcularCarro()</code>; cliente → <code>calcularCliente()</code>). <code>totalTaller</code> se va acumulando en el mismo recorrido, sin una quinta pasada aparte.</div>
+</section>
+
+<section id="liberar">
+  <h2>11. liberarMemoria() <span class="badge">10 pts</span></h2>
+  <blockquote>"Implemente una función liberarMemoria(Taller&amp; t) que recorra la jerarquía desde el nivel más profundo (Partes) hasta el nivel superior (Clientes), utilizando delete[]."</blockquote>
+  <pre><code>void liberarMemoria(Taller &t)
+{
+    for (int i = 0; i < t.cantClientes; i++) {
+        Cliente &cliente = t.clientes[i];
+        for (int j = 0; j < cliente.cantCarros; j++) {
+            Carro &carro = cliente.carros[j];
+            for (int k = 0; k < carro.cantTrabajos; k++) {
+                Trabajo &trabajo = carro.trabajos[k];
+                if (trabajo.partes != nullptr) delete[] trabajo.partes;   // 1. Partes
+                trabajo.partes = nullptr;
+            }
+            if (carro.trabajos != nullptr) delete[] carro.trabajos;      // 2. Trabajos
+        }
+        if (cliente.carros != nullptr) delete[] cliente.carros;          // 3. Carros
+    }
+    if (t.clientes != nullptr) delete[] t.clientes;                      // 4. Clientes
+    t.cantClientes = 0;
+}</code></pre>
+  <div class="why">El orden es el inverso exacto de cómo se construyó: primero se liberan las <code>Partes</code> de cada <code>Trabajo</code> (lo más profundo), después los <code>Trabajo[]</code> de cada <code>Carro</code>, después los <code>Carro[]</code> de cada <code>Cliente</code>, y al final el <code>Cliente[]</code> del <code>Taller</code>. Hacerlo al revés (por ejemplo borrar <code>t.clientes</code> primero) dejaría sin liberar toda la memoria de los niveles inferiores — un <i>memory leak</i>. Se llama justo después de <code>reporte()</code> en <code>main()</code>, como exige la restricción #9.</div>
+</section>
+
+<div class="total-row">
+  <span>main() — carga → reporte → libera, sin pedir datos por consola, Taller local (no global).</span>
+  <span>Total rúbrica: 100 pts</span>
+</div>
+
+</main>
+</body>
+</html>
