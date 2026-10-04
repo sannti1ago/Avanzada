@@ -1,0 +1,2202 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Proyecto Final — Sistema de Gestión Académica</title>
+<style>
+/* ═══════════════════════════════════════════════════════
+   CODE PROJECT — TEMA NEUTRO / OSCURO
+═══════════════════════════════════════════════════════ */
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #14161a; color: #e7e9ec; font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; }
+
+/* ── Header ─────────────────────────────────────────── */
+.header {
+  background: linear-gradient(135deg, #1c1f26 0%, #14161a 100%);
+  border-bottom: 2px solid #2c313a;
+  padding: 18px 24px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.header-left h1 { font-size: 18px; font-weight: 700; color: #7dd3c0; letter-spacing: .3px; }
+.header-left p  { font-size: 11px; color: #7b8290; margin-top: 2px; }
+.progress-wrap { display: flex; align-items: center; gap: 10px; }
+.progress-bar-outer { width: 140px; height: 6px; background: #21252c; border-radius: 3px; border: 1px solid #343a45; }
+.progress-bar-inner { height: 100%; background: linear-gradient(90deg, #7dd3c0, #8fa6ff); border-radius: 3px; transition: width .4s; }
+.progress-label { font-size: 11px; color: #7b8290; }
+
+/* ── Layout ──────────────────────────────────────────── */
+.layout { display: flex; min-height: calc(100vh - 65px); }
+
+/* ── Sidebar ─────────────────────────────────────────── */
+.sidebar {
+  width: 260px; flex-shrink: 0;
+  background: #1b1e24;
+  border-right: 1px solid #2c313a;
+  overflow-y: auto; padding: 12px 0;
+  position: sticky; top: 0; height: 100vh;
+}
+.sidebar-section { padding: 8px 16px 4px; font-size: 10px; font-weight: 700;
+  color: #5c6270; letter-spacing: 1px; text-transform: uppercase; }
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 16px; cursor: pointer;
+  transition: background .15s; border-left: 3px solid transparent;
+}
+.nav-item:hover { background: #21252c; }
+.nav-item.active { background: #23262e; border-left-color: #7dd3c0; }
+.nav-item .status-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.dot-done    { background: #7bc789; }
+.dot-active  { background: #7dd3c0; box-shadow: 0 0 7px #7dd3c099; }
+.dot-pending { background: #262a31; border: 1px solid #3a4049; }
+.nav-item .label { font-size: 12.5px; color: #c3c7cf; flex: 1; }
+.nav-item.active .label { color: #7dd3c0; font-weight: 600; }
+.nav-item .tag { font-size: 9px; padding: 2px 6px; border-radius: 10px; font-weight: 600; }
+.tag-done    { background: #1a2e1e; color: #7bc789; }
+.tag-active  { background: #1e2e2c; color: #7dd3c0; }
+.tag-pending { background: #1c1f25; color: #5c6270; }
+
+/* ── Main content ────────────────────────────────────── */
+.main { flex: 1; overflow-y: auto; padding: 24px; max-width: 900px; }
+
+/* ── Panels ──────────────────────────────────────────── */
+.panel { display: none; }
+.panel.active { display: block; }
+.panel-header { margin-bottom: 20px; }
+.panel-header h2 { font-size: 20px; font-weight: 700; color: #7dd3c0; }
+.panel-header p  { font-size: 13px; color: #7b8290; margin-top: 4px; }
+
+/* ── Status badges ───────────────────────────────────── */
+.status-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; margin-top: 8px;
+}
+.badge-done    { background: #1a2e1e; color: #7bc789; border: 1px solid #2d5236; }
+.badge-active  { background: #1e2e2c; color: #7dd3c0; border: 1px solid #33554e; }
+.badge-pending { background: #1c1f25; color: #5c6270; border: 1px solid #2c313a; }
+
+/* ── Code blocks ─────────────────────────────────────── */
+.code-wrap {
+  background: #101216; border: 1px solid #2c313a; border-radius: 8px;
+  overflow: hidden; margin: 16px 0;
+}
+.code-header {
+  background: #191c22; padding: 8px 16px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid #2c313a;
+}
+.code-header span { font-size: 11px; color: #7b8290; font-family: monospace; }
+.copy-btn {
+  background: #21252c; border: 1px solid #3a4049; color: #7dd3c0; font-size: 11px;
+  padding: 3px 10px; border-radius: 4px; cursor: pointer; transition: background .15s;
+}
+.copy-btn:hover  { background: #2a2f38; }
+.copy-btn.copied { background: #1a2e1e; color: #7bc789; border-color: #2d5236; }
+pre {
+  padding: 16px; overflow-x: auto; font-size: 12.5px;
+  font-family: 'Consolas', 'Courier New', monospace; line-height: 1.6;
+  color: #e7e9ec;
+}
+
+/* ── Syntax highlight (paleta neutra) ────────────────── */
+.kw { color: #e0776d; }
+.ty { color: #8fa6ff; }
+.cm { color: #7b8290; font-style: italic; }
+.st { color: #7dd3c0; }
+.nm { color: #c3b88a; }
+.fn { color: #8fa6ff; }
+.pp { color: #e0776d; }
+
+/* ── Explanation cards ───────────────────────────────── */
+.explain-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 16px 0; }
+.explain-card {
+  background: #1b1e24; border: 1px solid #2c313a; border-radius: 8px; padding: 14px;
+}
+.explain-card h4 { font-size: 12px; color: #7dd3c0; font-weight: 700; margin-bottom: 6px; }
+.explain-card p  { font-size: 12px; color: #a6abb3; line-height: 1.5; }
+.explain-card code { background: #21252c; color: #8fa6ff; padding: 1px 5px; border-radius: 3px; font-size: 11px; border: 1px solid #343a45; }
+
+/* ── Note boxes ──────────────────────────────────────── */
+.note {
+  border-radius: 6px; padding: 10px 14px; font-size: 12px;
+  line-height: 1.5; margin: 10px 0; display: flex; gap: 10px; align-items: flex-start;
+}
+.note-info { background: #191c22; border-left: 3px solid #8fa6ff; color: #a9b4d6; }
+.note-warn { background: #241a18; border-left: 3px solid #e0776d; color: #e3a29b; }
+.note-ok   { background: #142016; border-left: 3px solid #7bc789; color: #a3d1ac; }
+
+/* ── Overview cards ──────────────────────────────────── */
+.overview-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin: 16px 0; }
+.ov-card {
+  background: #1b1e24; border: 1px solid #2c313a; border-radius: 10px; padding: 16px;
+  cursor: pointer; transition: border-color .2s, background .2s;
+}
+.ov-card:hover { border-color: #7dd3c0; background: #1f2329; }
+.ov-card .ov-num    { font-size: 10px; color: #5c6270; font-weight: 700; letter-spacing: 1px; }
+.ov-card .ov-name   { font-size: 14px; font-weight: 700; color: #e7e9ec; margin: 4px 0; }
+.ov-card .ov-desc   { font-size: 11px; color: #7b8290; }
+.ov-card .ov-status { margin-top: 8px; }
+
+/* ── Sustentación / Q&A cards ─────────────────────────── */
+.sust-card {
+  background: #191826; border: 1px solid #3a3a5a;
+  border-left: 4px solid #8fa6ff; border-radius: 8px;
+  padding: 14px; margin: 16px 0;
+}
+.sust-card h4  { font-size: 12px; color: #8fa6ff; font-weight: 700; margin-bottom: 10px; letter-spacing: .3px; }
+.sust-card .qa { margin-bottom: 10px; }
+.sust-card .q  { font-size: 12px; color: #b8c2f0; font-weight: 600; margin-bottom: 3px; }
+.sust-card .a  { font-size: 11.5px; color: #939aab; line-height: 1.5; padding-left: 10px; border-left: 2px solid #2e2e48; }
+.sust-card code { background: #23233a; color: #8fa6ff; padding: 1px 5px; border-radius: 3px; font-size: 11px; }
+
+/* ── New function / hint cards ───────────────────────── */
+.new-func {
+  background: #0f1a20; border: 1px solid #33554e;
+  border-left: 4px solid #7dd3c0; border-radius: 8px;
+  padding: 14px; margin: 12px 0;
+}
+.new-func h4   { font-size: 12px; color: #7dd3c0; font-weight: 700; margin-bottom: 8px; }
+.new-func p    { font-size: 11.5px; color: #9aa8a4; line-height: 1.6; }
+.new-func code { background: #142320; color: #7dd3c0; padding: 1px 5px; border-radius: 3px; font-size: 11px; }
+
+/* ── Divider ─────────────────────────────────────────── */
+.divider { border: none; border-top: 1px solid #2c313a; margin: 20px 0; }
+
+/* ── extras propios de este documento (jerarquía) ────── */
+.hierarchy { display:flex; align-items:center; gap:10px; flex-wrap:wrap; font-family:'Consolas',monospace; font-size:12px; margin:10px 0 4px; }
+.hierarchy .lvl { background:#21252c; border:1px solid #343a45; color:#e7e9ec; padding:5px 12px; border-radius:20px; }
+.hierarchy .arrow { color:#7dd3c0; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1>Sistema de Gestión Académica</h1>
+    <p>Proyecto Final — Programación Avanzada</p>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-bar-outer"><div class="progress-bar-inner" id="progressBar" style="width:100%"></div></div>
+    <div class="progress-label" id="progressLabel">6 / 6 bloques — completo</div>
+  </div>
+</div>
+
+<div class="layout">
+  <div class="sidebar">
+    <div class="sidebar-section">Resumen</div>
+    <div class="nav-item active" data-panel="overview">
+      <span class="status-dot dot-active"></span>
+      <span class="label">Vista general</span>
+    </div>
+
+    <div class="sidebar-section">Bloques</div>
+    <div class="nav-item" data-panel="b1">
+      <span class="status-dot dot-done"></span>
+      <span class="label">1. Estructuras y memoria</span>
+      <span class="tag tag-done">LISTO</span>
+    </div>
+    <div class="nav-item" data-panel="b2">
+      <span class="status-dot dot-done"></span>
+      <span class="label">2. Persistencia binaria</span>
+      <span class="tag tag-done">LISTO</span>
+    </div>
+    <div class="nav-item" data-panel="b3">
+      <span class="status-dot dot-done"></span>
+      <span class="label">3. Menú y registro</span>
+      <span class="tag tag-done">LISTO</span>
+    </div>
+    <div class="nav-item" data-panel="b4">
+      <span class="status-dot dot-done"></span>
+      <span class="label">4. Carga masiva CSV</span>
+      <span class="tag tag-done">LISTO</span>
+    </div>
+    <div class="nav-item" data-panel="b5">
+      <span class="status-dot dot-done"></span>
+      <span class="label">5. Listados y búsqueda</span>
+      <span class="tag tag-done">LISTO</span>
+    </div>
+    <div class="nav-item" data-panel="b6">
+      <span class="status-dot dot-done"></span>
+      <span class="label">6. Reportes TXT</span>
+      <span class="tag tag-done">LISTO</span>
+    </div>
+
+    <div class="sidebar-section">Referencia</div>
+    <div class="nav-item" data-panel="full">
+      <span class="status-dot dot-pending"></span>
+      <span class="label">Código completo</span>
+    </div>
+  </div>
+
+  <div class="main">
+
+    <!-- ═══════════ VISTA GENERAL ═══════════ -->
+    <div class="panel active" id="panel-overview">
+      <div class="panel-header">
+        <h2>Sistema de Gestión Académica Universitaria</h2>
+        <p>Universidad → Programas → Estudiantes → Matrículas, con arreglos dinámicos, persistencia binaria y reportes CSV.</p>
+      </div>
+
+      <div class="hierarchy">
+        <div class="lvl">Universidad</div><span class="arrow">→</span>
+        <div class="lvl">Programa*</div><span class="arrow">→</span>
+        <div class="lvl">Estudiante*</div><span class="arrow">→</span>
+        <div class="lvl">Matricula*</div>
+      </div>
+
+      <div class="overview-grid">
+        <div class="ov-card" data-panel="b1">
+          <div class="ov-num">BLOQUE 1</div>
+          <div class="ov-name">Estructuras y memoria dinámica</div>
+          <div class="ov-desc">Los 5 structs + agregarPrograma/Estudiante/Matricula con el patrón new→copiar→agregar→delete[].</div>
+          <div class="ov-status"><span class="status-badge badge-done">✓ Aprobado</span></div>
+        </div>
+        <div class="ov-card" data-panel="b2">
+          <div class="ov-num">BLOQUE 2</div>
+          <div class="ov-name">Persistencia binaria</div>
+          <div class="ov-desc">Structs "de disco" sin punteros, carga/guardado de .dat y liberación total con delete[].</div>
+          <div class="ov-status"><span class="status-badge badge-done">✓ Aprobado</span></div>
+        </div>
+        <div class="ov-card" data-panel="b3">
+          <div class="ov-num">BLOQUE 3</div>
+          <div class="ov-name">Menú y registro</div>
+          <div class="ov-desc">Menú de 14 opciones y las opciones 1-3 (registrar programa, estudiante, matrícula).</div>
+          <div class="ov-status"><span class="status-badge badge-done">✓ Aprobado</span></div>
+        </div>
+        <div class="ov-card" data-panel="b4">
+          <div class="ov-num">BLOQUE 4</div>
+          <div class="ov-name">Carga masiva CSV</div>
+          <div class="ov-desc">Leer estudiantes.csv, crear programas si no existen, agregar estudiantes en memoria.</div>
+          <div class="ov-status"><span class="status-badge badge-done">✓ Aprobado</span></div>
+        </div>
+        <div class="ov-card" data-panel="b5">
+          <div class="ov-num">BLOQUE 5</div>
+          <div class="ov-name">Listados y búsqueda</div>
+          <div class="ov-desc">Opciones 6-9: listar programas, estudiantes por programa, buscar por documento, historial escalonado.</div>
+          <div class="ov-status"><span class="status-badge badge-done">✓ Aprobado</span></div>
+        </div>
+        <div class="ov-card" data-panel="b6">
+          <div class="ov-num">BLOQUE 6</div>
+          <div class="ov-name">Reportes TXT</div>
+          <div class="ov-desc">Opciones 10-13: reportes de programas, estudiantes, matrículas y promedios en archivo de texto.</div>
+          <div class="ov-status"><span class="status-badge badge-done">✓ Aprobado</span></div>
+        </div>
+      </div>
+
+      <div class="note note-info">
+        <span>ℹ️</span>
+        <div>El menú del enunciado salta del 3 al 5 (no hay opción 4) y menciona "opción 15" para salir cuando la tabla solo llega a 14. Asumimos <code>14 = Salir</code> (coincide con la tabla y con el "menú de 14 opciones" de la rúbrica) y tratamos el 15 como error de tipeo.</div>
+      </div>
+
+      <div class="note note-ok">
+        <span>📦</span>
+        <div><strong>Entregables:</strong> <code>proyecto_final.cpp</code> + <code>estudiantes.csv</code> (necesario para probar la opción 5 — ver Bloque 4).</div>
+      </div>
+    </div>
+
+    <!-- ═══════════ BLOQUE 1 ═══════════ -->
+    <div class="panel" id="panel-b1">
+      <div class="panel-header">
+        <h2>Bloque 1 — Estructuras y memoria dinámica</h2>
+        <p>Los 5 structs jerárquicos y las tres funciones obligatorias de manejo de arreglos dinámicos.</p>
+        <span class="status-badge badge-done">✓ Aprobado — 15% + 10% de la rúbrica de memoria dinámica</span>
+      </div>
+
+      <div class="note note-info">
+        <span>📋</span>
+        <div>"Fecha debe manejarse con char[]" · "Universidad → Programas → Estudiantes → Matrículas" (relación obligatoria de 3 niveles).</div>
+      </div>
+
+      <div class="explain-grid">
+        <div class="explain-card">
+          <h4>Cajas dentro de cajas</h4>
+          <p>La <code>Universidad</code> no guarda estudiantes directamente: guarda <code>Programa</code>s, y cada programa guarda sus propios estudiantes. Cada nivel tiene un arreglo del nivel siguiente + su contador.</p>
+        </div>
+        <div class="explain-card">
+          <h4>¿Por qué el contador?</h4>
+          <p>Un puntero como <code>Estudiante*</code> solo guarda una dirección. No sabe cuántos elementos hay detrás — por eso <code>estudiantesCount</code> es obligatorio, no un capricho.</p>
+        </div>
+      </div>
+
+      <!-- STRUCTS, uno por uno -->
+      <div class="code-wrap">
+        <div class="code-header"><span>Fecha</span><button class="copy-btn">Copiar</button></div>
+        <pre><code>struct Fecha{
+    char anio[5];
+    char mes[3];
+    char dia[3];
+};</code></pre>
+      </div>
+      <div class="explain-card" style="margin:0 0 14px;">
+        <p><code>char[]</code>, no <code>int</code>: el enunciado lo exige explícito. Tamaños con espacio para el <code>'\0'</code> final: <code>"2026"</code> son 4 caracteres + terminador = <code>anio[5]</code>; <code>"09"</code> son 2 + terminador = <code>mes[3]</code>/<code>dia[3]</code>.</p>
+      </div>
+
+      <div class="code-wrap">
+        <div class="code-header"><span>Matricula</span><button class="copy-btn">Copiar</button></div>
+        <pre><code>struct Matricula{
+    int id;
+    char codigoMateria[10];
+    char nombreMateria[40];
+    float notas[3];
+    float definitiva;
+    Fecha fecha;
+};</code></pre>
+      </div>
+      <div class="explain-card" style="margin:0 0 14px;">
+        <p>Es el nivel más profundo de la jerarquía — no tiene arreglo de "hijos", solo datos propios. <code>fecha</code> es un struct dentro de otro struct (composición), y <code>notas[3]</code> es fijo porque el enunciado dice siempre 3 notas por materia.</p>
+      </div>
+
+      <div class="code-wrap">
+        <div class="code-header"><span>Estudiante y Programa</span><button class="copy-btn">Copiar</button></div>
+        <pre><code>struct Estudiante{
+    int id;
+    char nombre[50];
+    char documento[20];
+    char telefono[20];
+    Matricula *matriculas;
+    int matriculasCount;
+};
+
+struct Programa{
+    int codigo;
+    char nombre[50];
+    Estudiante *estudiantes;
+    int estudiantesCount;
+};</code></pre>
+      </div>
+      <div class="explain-card" style="margin:0 0 14px;">
+        <p>Ambos repiten el mismo patrón: datos propios + <code>Tipo *arreglo</code> + <code>arregloCount</code>. <code>Estudiante</code> apunta hacia sus <code>Matricula</code>s, <code>Programa</code> apunta hacia sus <code>Estudiante</code>s — así se arma la cadena de 3 niveles sin que ningún nivel conozca al de más arriba.</p>
+      </div>
+
+      <div class="code-wrap">
+        <div class="code-header"><span>Universidad</span><button class="copy-btn">Copiar</button></div>
+        <pre><code>struct Universidad{
+    Programa *programas;
+    int programasCount;
+};</code></pre>
+      </div>
+      <div class="explain-card" style="margin:0 0 14px;">
+        <p>La raíz de la jerarquía. Una sola variable global <code>Universidad universidad = {nullptr, 0};</code> es el punto de entrada a <em>todos</em> los datos del programa — todo lo demás cuelga de ahí.</p>
+      </div>
+
+      <hr class="divider">
+
+      <!-- agregarPrograma paso a paso -->
+      <p style="color:#7b8290;font-size:12px;margin:14px 0 4px;"><code>agregarPrograma()</code> en 3 partes — el patrón de crecimiento que se repite en las otras dos funciones.</p>
+
+      <div class="code-wrap">
+        <div class="code-header"><span>1. Verificar que no exista ya</span><button class="copy-btn">Copiar</button></div>
+        <pre><code>void agregarPrograma(int codigo, const char nombre[]){
+    if (buscarPrograma(codigo) != nullptr){
+        cout &lt;&lt; "El programa con codigo " &lt;&lt; codigo &lt;&lt; " ya existe." &lt;&lt; endl;
+        return;
+    }</code></pre>
+      </div>
+      <div class="explain-card" style="margin:0 0 16px;">
+        <p>Regla de negocio "código único" resuelta con un <code>return</code> temprano: si <code>buscarPrograma</code> ya lo encuentra, ni siquiera se llega a tocar memoria.</p>
+      </div>
+
+      <div class="code-wrap">
+        <div class="code-header"><span>2. Crear el arreglo nuevo, copiar y llenar la posición nueva</span><button class="copy-btn">Copiar</button></div>
+        <pre><code>    Programa *nuevoArreglo = new Programa[universidad.programasCount + 1];
+
+    for (int i = 0; i &lt; universidad.programasCount; i++){
+        nuevoArreglo[i] = universidad.programas[i];
+    }
+
+    nuevoArreglo[universidad.programasCount].codigo = codigo;
+    strcpy(nuevoArreglo[universidad.programasCount].nombre, nombre);
+    nuevoArreglo[universidad.programasCount].estudiantes = nullptr;
+    nuevoArreglo[universidad.programasCount].estudiantesCount = 0;</code></pre>
+      </div>
+      <div class="explain-card" style="margin:0 0 16px;">
+        <p><code>new Programa[N+1]</code> reserva un arreglo un espacio más grande que el actual. El <code>for</code> copia los <code>N</code> programas viejos tal cual estaban. La última posición (índice <code>N</code>, el tamaño viejo) se llena a mano — y <code>estudiantes = nullptr</code> / <code>estudiantesCount = 0</code> son obligatorios: ese programa nuevo todavía no tiene hijos.</p>
+      </div>
+
+      <div class="code-wrap">
+        <div class="code-header"><span>3. Liberar el arreglo viejo y reasignar</span><button class="copy-btn">Copiar</button></div>
+        <pre><code>    delete[] universidad.programas;
+
+    universidad.programas = nuevoArreglo;
+    universidad.programasCount++;
+
+    cout &lt;&lt; "Programa creado correctamente. Codigo: " &lt;&lt; codigo &lt;&lt; endl;
+}</code></pre>
+      </div>
+      <div class="explain-card" style="margin:0 0 16px;">
+        <p>El <code>delete[]</code> va <em>después</em> de terminar de copiar y llenar — si fuera antes, se liberaría memoria que el <code>for</code> de arriba todavía necesita leer. Recién ahí se reasigna el puntero al arreglo nuevo y sube el contador.</p>
+      </div>
+
+      <!-- agregarEstudiante -->
+      <p style="color:#7b8290;font-size:12px;margin:14px 0 4px;"><code>agregarEstudiante()</code> — mismo patrón, un nivel más abajo, dividido en validación + inserción.</p>
+
+      <div class="code-wrap">
+        <div class="code-header"><span>1. Validar programa y documento único</span><button class="copy-btn">Copiar</button></div>
+        <pre><code>void agregarEstudiante(int codigoPrograma, const char nombre[], const char documento[], const char telefono[]){
+    Programa *programa = buscarPrograma(codigoPrograma);
+    if (programa == nullptr){
+        cout &lt;&lt; "No existe un programa con codigo " &lt;&lt; codigoPrograma &lt;&lt; endl;
+        return;
+    }
+    if (buscarEstudiantePorDocumento(documento) != nullptr){
+        cout &lt;&lt; "Ya existe un estudiante con el documento " &lt;&lt; documento &lt;&lt; endl;
+        return;
+    }</code></pre>
+      </div>
+      <div class="explain-card" style="margin:0 0 16px;">
+        <p>Dos reglas de negocio distintas, dos <code>return</code> tempranos: "debe pertenecer a un programa existente" y "documento único en toda la universidad" (no solo en el programa).</p>
+      </div>
+
+      <div class="code-wrap">
+        <div class="code-header"><span>2. Generar ID e insertar</span><button class="copy-btn">Copiar</button></div>
+        <pre><code>    int nuevoId = generarIdEstudiante();
+    insertarEstudiante(programa, nuevoId, nombre, documento, telefono);
+
+    cout &lt;&lt; "Estudiante creado correctamente. ID asignado: " &lt;&lt; nuevoId &lt;&lt; endl;
+}</code></pre>
+      </div>
+      <div class="explain-card" style="margin:0 0 16px;">
+        <p>La mecánica de crecer el arreglo (new N+1 → copiar → delete[]) vive aparte en <code>insertarEstudiante</code>, no acá — <code>agregarEstudiante</code> solo valida y genera el ID. Esa separación es la que permite reutilizar <code>insertarEstudiante</code> en el Bloque 2 (cargar desde disco) y el Bloque 4 (cargar desde CSV) sin duplicar código.</p>
+      </div>
+
+      <hr class="divider">
+
+      <!-- Busquedas, una por una -->
+      <div class="code-wrap">
+        <div class="code-header"><span>buscarPrograma()</span><button class="copy-btn">Copiar</button></div>
+        <pre><code>Programa* buscarPrograma(int codigo){
+    for (int i = 0; i &lt; universidad.programasCount; i++){
+        if (universidad.programas[i].codigo == codigo)
+            return &amp;universidad.programas[i];
+    }
+    return nullptr;
+}</code></pre>
+      </div>
+      <div class="explain-card" style="margin:0 0 14px;">
+        <p>Recorrido lineal simple: el arreglo no está ordenado por código, así que no hay atajo. Devuelve <code>&amp;universidad.programas[i]</code> (la dirección de esa posición, no una copia) para que quien llame pueda modificarlo directamente; <code>nullptr</code> si no aparece.</p>
+      </div>
+
+      <div class="code-wrap">
+        <div class="code-header"><span>buscarEstudiantePorDocumento()</span><button class="copy-btn">Copiar</button></div>
+        <pre><code>Estudiante* buscarEstudiantePorDocumento(const char documento[]){
+    for (int p = 0; p &lt; universidad.programasCount; p++){
+        Programa &amp;prog = universidad.programas[p];
+        for (int e = 0; e &lt; prog.estudiantesCount; e++){
+            if (strcmp(prog.estudiantes[e].documento, documento) == 0)
+                return &amp;prog.estudiantes[e];
+        }
+    }
+    return nullptr;
+}</code></pre>
+      </div>
+      <div class="explain-card" style="margin:0 0 14px;">
+        <p>Dos <code>for</code> anidados porque hay que bajar dos niveles: universidad → programas → estudiantes. Recorre <strong>todos</strong> los programas (no uno solo) porque el documento debe ser único en toda la universidad. <code>strcmp(...) == 0</code> es la forma correcta de comparar <code>char[]</code> — <code>==</code> compararía direcciones, no contenido.</p>
+      </div>
+
+      <div class="code-wrap">
+        <div class="code-header"><span>generarIdEstudiante()</span><button class="copy-btn">Copiar</button></div>
+        <pre><code>int generarIdEstudiante(){
+    int id;
+    bool repetido;
+    do{
+        id = rand() % 90000 + 10000;
+        repetido = false;
+        for (int p = 0; p &lt; universidad.programasCount &amp;&amp; !repetido; p++){
+            for (int e = 0; e &lt; universidad.programas[p].estudiantesCount; e++){
+                if (universidad.programas[p].estudiantes[e].id == id){
+                    repetido = true;
+                    break;
+                }
+            }
+        }
+    } while (repetido);
+    return id;
+}</code></pre>
+      </div>
+      <div class="explain-card" style="margin:0 0 14px;">
+        <p><code>rand() % 90000 + 10000</code> siempre da un número de 5 cifras (10000 a 99999). El <code>do-while</code> vuelve a tirar el dado si ese número ya existe entre todos los estudiantes — necesita un <code>do-while</code> (no un <code>while</code>) porque el primer intento siempre tiene que probarse al menos una vez antes de poder preguntar "¿está repetido?".</p>
+      </div>
+
+      <div class="sust-card">
+        <h4>🎤 Preguntas típicas de sustentación</h4>
+        <div class="qa">
+          <div class="q">¿Por qué necesitas estudiantesCount si ya tienes el puntero?</div>
+          <div class="a">Un puntero solo guarda una dirección de memoria. <code>sizeof()</code> sobre él da el tamaño del puntero (8 bytes), no el número de elementos reservados — sin el contador no hay forma de saber hasta dónde recorrer el arreglo.</div>
+        </div>
+        <div class="qa">
+          <div class="q">¿Por qué no usar vector si sería más fácil?</div>
+          <div class="a">El enunciado lo prohíbe explícitamente: hay que demostrar el manejo manual de <code>new[]</code>/<code>delete[]</code> y el redimensionamiento, que es justo lo que califica el 35% de memoria dinámica.</div>
+        </div>
+        <div class="qa">
+          <div class="q">¿Qué pasa si haces delete[] antes de copiar todo?</div>
+          <div class="a">Liberas memoria que el ciclo de copia todavía está leyendo → comportamiento indefinido. Por eso el <code>delete[]</code> del arreglo viejo siempre va después de terminar de armar el nuevo.</div>
+        </div>
+      </div>
+
+      <div class="new-func">
+        <h4>🔧 Si te piden agregar una función nueva de este tipo</h4>
+        <p><strong>eliminarEstudiante(documento):</strong> mismo patrón pero al revés — reservas un arreglo de tamaño N-1, copias todos los elementos <em>excepto</em> el que se elimina (saltas esa posición al copiar), <code>delete[]</code> el arreglo viejo, reasignas el puntero, y bajas el contador en vez de subirlo. Antes de copiar, valida con <code>buscarEstudiantePorDocumento</code> que sí exista.</p>
+        <p style="margin-top:8px;"><strong>actualizarTelefono(documento, nuevoTelefono):</strong> no necesita crecer ningún arreglo — busca el estudiante con <code>buscarEstudiantePorDocumento</code> (que devuelve <code>Estudiante*</code>, no una copia) y haces <code>strcpy(est-&gt;telefono, nuevoTelefono)</code> directo sobre esa dirección de memoria.</p>
+        <p style="margin-top:8px;"><strong>contarEstudiantesPorPrograma():</strong> no crea nada nuevo, solo recorre — un <code>for</code> sobre <code>universidad.programas</code> imprimiendo <code>prog.estudiantesCount</code> de cada uno. Útil para entender la diferencia entre "crear/crecer" (necesita el patrón de 5 pasos) y "solo consultar" (no lo necesita).</p>
+      </div>
+    </div>
+
+    <!-- ═══════════ BLOQUE 2 ═══════════ -->
+    <div class="panel" id="panel-b2">
+      <div class="panel-header">
+        <h2>Bloque 2 — Persistencia binaria</h2>
+        <p>Carga automática de los .dat al iniciar, sobrescritura íntegra y liberación total al salir.</p>
+        <span class="status-badge badge-done">✓ Aprobado — 10% persistencia + 10% liberación de memoria</span>
+      </div>
+
+      <div class="note note-info">
+        <span>📋</span>
+        <div>"Al iniciar: lee los archivos binarios, toda la información en memoria dinámica" · "Al salir: eliminar los archivos anteriores, escribir nuevamente los .dat, liberar toda la memoria con delete[]".</div>
+      </div>
+
+      <div class="note note-warn">
+        <span>⚠️</span>
+        <div>Los structs del Bloque 1 tienen punteros (<code>Estudiante*</code>, <code>Matricula*</code>). Escribir <code>write((char*)&amp;programa, sizeof(programa))</code> guardaría esa dirección de memoria como si fuera un dato — al recargar el archivo, esa dirección ya no significa nada. Por eso se usan structs "de disco" sin punteros.</div>
+      </div>
+
+      <div class="code-wrap">
+        <div class="code-header"><span>structs de disco (sin punteros)</span><button class="copy-btn">Copiar</button></div>
+        <pre><code>struct ProgramaDisco{
+    int codigo;
+    char nombre[50];
+};
+
+struct EstudianteDisco{
+    int idPrograma;   // clave foranea: a que programa pertenece
+    int id;
+    char nombre[50];
+    char documento[20];
+    char telefono[20];
+};
+
+struct MatriculaDisco{
+    int idEstudiante; // clave foranea: de que estudiante es
+    int id;
+    char codigoMateria[10];
+    char nombreMateria[40];
+    float notas[3];
+    float definitiva;
+    Fecha fecha;
+};</code></pre>
+      </div>
+
+      <div class="explain-grid">
+        <div class="explain-card">
+          <h4>La clave foránea manual</h4>
+          <p><code>EstudianteDisco</code> guarda <code>idPrograma</code> y <code>MatriculaDisco</code> guarda <code>idEstudiante</code> — sin eso, al leer el archivo plano no habría forma de saber a quién pertenece cada registro. Mismo concepto que un FK relacional.</p>
+        </div>
+        <div class="explain-card">
+          <h4>Pequeño ajuste al Bloque 1</h4>
+          <p>Se separó <code>insertarEstudiante</code>/<code>insertarMatricula</code> (solo la mecánica de crecer el arreglo) de <code>agregarEstudiante</code>/<code>agregarMatricula</code> (valida + genera ID + llama al insertar) — así la carga puede reutilizar el ID original en vez de generar uno nuevo.</p>
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <p style="color:#7b8290;font-size:12px;margin:14px 0 4px;"><code>cargarUniversidad()</code> en sus 3 fases — el orden de lectura no es arbitrario.</p>
+
+      <div class="code-wrap">
+        <div class="code-header"><span>1. Programas primero</span><button class="copy-btn">Copiar</button></div>
+        <pre><code>void cargarUniversidad(){
+    ifstream archivoProgramas("programas.dat", ios::binary);
+    if (archivoProgramas.is_open()){
+        ProgramaDisco pd;
+        while (archivoProgramas.read((char*)&amp;pd, sizeof(pd))){
+            agregarPrograma(pd.codigo, pd.nombre);
+        }
+        archivoProgramas.close();
+    }</code></pre>
+      </div>
+      <div class="explain-card" style="margin:0 0 16px;">
+        <p><code>archivoProgramas.read((char*)&amp;pd, sizeof(pd))</code> lee exactamente <code>sizeof(ProgramaDisco)</code> bytes del archivo y los vuelca en <code>pd</code>, registro por registro — igual devuelve el stream, que en el <code>while</code> se evalúa <code>false</code> cuando ya no hay más bytes que leer. Van primero porque los estudiantes del siguiente paso van a necesitar <code>buscarPrograma()</code> para engancharse a uno que ya exista.</p>
+      </div>
+
+      <div class="code-wrap">
+        <div class="code-header"><span>2. Estudiantes, enganchados por idPrograma</span><button class="copy-btn">Copiar</button></div>
+        <pre><code>    ifstream archivoEstudiantes("estudiantes.dat", ios::binary);
+    if (archivoEstudiantes.is_open()){
+        EstudianteDisco ed;
+        while (archivoEstudiantes.read((char*)&amp;ed, sizeof(ed))){
+            Programa *programa = buscarPrograma(ed.idPrograma);
+            if (programa != nullptr){
+                insertarEstudiante(programa, ed.id, ed.nombre, ed.documento, ed.telefono);
+            }
+        }
+        archivoEstudiantes.close();
+    }</code></pre>
+      </div>
+      <div class="explain-card" style="margin:0 0 16px;">
+        <p>Cada registro trae su <code>idPrograma</code> (la FK). Se busca ese programa en memoria y, si existe, se le engancha el estudiante con <code>insertarEstudiante</code> — usando el <code>ed.id</code> que ya trae el archivo, no uno nuevo.</p>
+      </div>
+
+      <div class="code-wrap">
+        <div class="code-header"><span>3. Matrículas al final</span><button class="copy-btn">Copiar</button></div>
+        <pre><code>    ifstream archivoMatriculas("matriculas.dat", ios::binary);
+    if (archivoMatriculas.is_open()){
+        MatriculaDisco md;
+        while (archivoMatriculas.read((char*)&amp;md, sizeof(md))){
+            Estudiante *estudiante = buscarEstudiantePorId(md.idEstudiante);
+            if (estudiante != nullptr){
+                insertarMatricula(estudiante, md.id, md.codigoMateria, md.nombreMateria, md.fecha, md.notas, md.definitiva);
+            }
+        }
+        archivoMatriculas.close();
+    }
+}</code></pre>
+      </div>
+      <div class="explain-card" style="margin:0 0 16px;">
+        <p>Van al final porque necesitan que su estudiante ya esté en memoria para poder buscarlo por <code>md.idEstudiante</code> con <code>buscarEstudiantePorId</code>. Si el orden de las 3 fases se invirtiera, esta búsqueda siempre fallaría (<code>nullptr</code>) porque el estudiante todavía no existiría.</p>
+      </div>
+
+      <hr class="divider">
+
+      <p style="color:#7b8290;font-size:12px;margin:14px 0 4px;"><code>guardarUniversidad()</code> en sus 3 fases.</p>
+
+      <div class="code-wrap">
+        <div class="code-header"><span>1. Borrar lo viejo y abrir los 3 archivos nuevos</span><button class="copy-btn">Copiar</button></div>
+        <pre><code>void guardarUniversidad(){
+    remove("programas.dat");
+    remove("estudiantes.dat");
+    remove("matriculas.dat");
+
+    ofstream archivoProgramas("programas.dat", ios::binary);
+    ofstream archivoEstudiantes("estudiantes.dat", ios::binary);
+    ofstream archivoMatriculas("matriculas.dat", ios::binary);</code></pre>
+      </div>
+      <div class="explain-card" style="margin:0 0 16px;">
+        <p><code>remove()</code> (de <code>&lt;cstdio&gt;</code>) borra el archivo del disco. Es literalmente "eliminar los archivos anteriores" del enunciado, antes de "escribir nuevamente los .dat" — sin este paso, si la universidad tuviera menos registros que antes, quedarían registros viejos pegados al final del archivo nuevo.</p>
+      </div>
+
+      <div class="code-wrap">
+        <div class="code-header"><span>2. Recorrer la jerarquía completa y escribir cada nivel</span><button class="copy-btn">Copiar</button></div>
+        <pre><code>    for (int p = 0; p &lt; universidad.programasCount; p++){
+        Programa &amp;prog = universidad.programas[p];
+
+        ProgramaDisco pd;
+        pd.codigo = prog.codigo;
+        strcpy(pd.nombre, prog.nombre);
+        archivoProgramas.write((char*)&amp;pd, sizeof(pd));
+
+        for (int e = 0; e &lt; prog.estudiantesCount; e++){
+            Estudiante &amp;est = prog.estudiantes[e];
+
+            EstudianteDisco ed;
+            ed.idPrograma = prog.codigo;
+            ed.id = est.id;
+            strcpy(ed.nombre, est.nombre);
+            strcpy(ed.documento, est.documento);
+            strcpy(ed.telefono, est.telefono);
+            archivoEstudiantes.write((char*)&amp;ed, sizeof(ed));
+
+            for (int m = 0; m &lt; est.matriculasCount; m++){
+                Matricula &amp;mat = est.matriculas[m];
+
+                MatriculaDisco md;
+                md.idEstudiante = est.id;
+                md.id = mat.id;
+                strcpy(md.codigoMateria, mat.codigoMateria);
+                strcpy(md.nombreMateria, mat.nombreMateria);
+                for (int n = 0; n &lt; 3; n++) md.notas[n] = mat.notas[n];
+                md.definitiva = mat.definitiva;
+                md.fecha = mat.fecha;
+                archivoMatriculas.write((char*)&amp;md, sizeof(md));
+            }
+        }
+    }</code></pre>
+      </div>
+      <div class="explain-card" style="margin:0 0 16px;">
+        <p>3 <code>for</code> anidados, uno por nivel de la jerarquía. En cada nivel se arma el struct "de disco" copiando campo por campo desde el struct real (llenando también la FK: <code>ed.idPrograma = prog.codigo</code>, <code>md.idEstudiante = est.id</code>) y se escribe con <code>write()</code> al archivo de ese nivel — los 3 archivos se van llenando en paralelo mientras se recorre una sola vez toda la estructura.</p>
+      </div>
+
+      <div class="code-wrap">
+        <div class="code-header"><span>3. Cerrar archivos</span><button class="copy-btn">Copiar</button></div>
+        <pre><code>    archivoProgramas.close();
+    archivoEstudiantes.close();
+    archivoMatriculas.close();
+    cout &lt;&lt; "Informacion guardada correctamente." &lt;&lt; endl;
+}</code></pre>
+      </div>
+      <div class="explain-card" style="margin:0 0 16px;">
+        <p><code>close()</code> fuerza a que todo lo que quedó en buffer se escriba de verdad al disco — si el programa termina sin cerrar el archivo, se puede perder el último bloque de datos.</p>
+      </div>
+
+      <div class="code-wrap">
+        <div class="code-header"><span>liberarMemoria()</span><button class="copy-btn">Copiar</button></div>
+        <pre><code>void liberarMemoria(){
+    for (int p = 0; p &lt; universidad.programasCount; p++){
+        Programa &amp;prog = universidad.programas[p];
+        for (int e = 0; e &lt; prog.estudiantesCount; e++){
+            delete[] prog.estudiantes[e].matriculas;
+        }
+        delete[] prog.estudiantes;
+    }
+    delete[] universidad.programas;
+    universidad.programas = nullptr;
+    universidad.programasCount = 0;
+}</code></pre>
+      </div>
+      <div class="explain-card" style="margin:0 0 16px;">
+        <p>Libera de abajo hacia arriba: primero las <code>matriculas</code> de cada estudiante, después los <code>estudiantes</code> de cada programa, al final los <code>programas</code>. Si se hiciera al revés (<code>delete[] universidad.programas</code> primero), se perdería el único puntero que permitía llegar a los estudiantes y matrículas — quedarían huérfanos en memoria sin forma de liberarlos (memory leak).</p>
+      </div>
+
+      <div class="sust-card">
+        <h4>🎤 Preguntas típicas de sustentación</h4>
+        <div class="qa">
+          <div class="q">¿Por qué no escribes el struct Programa directamente al archivo?</div>
+          <div class="a">Porque tiene un puntero (<code>Estudiante* estudiantes</code>). Esa dirección de RAM solo es válida mientras el programa corre — al reabrir el .dat ya no significa nada. Por eso se usan structs "de disco" sin punteros y se reconstruye la jerarquía llamando otra vez a las funciones <code>agregarX</code>/<code>insertarX</code>.</div>
+        </div>
+        <div class="qa">
+          <div class="q">¿Por qué agregarEstudiante ya no genera el ID al cargar desde archivo?</div>
+          <div class="a">Porque el ID real ya fue asignado la primera vez que se creó el estudiante, y ya está referenciado como FK en matriculas.dat. Por eso se separó <code>insertarEstudiante</code> (mecánica pura) de <code>agregarEstudiante</code> (valida + genera + llama al insertar) — la carga usa el insertar directo con el ID original.</div>
+        </div>
+      </div>
+
+      <div class="new-func">
+        <h4>🔧 Si te piden guardar/cargar un dato nuevo</h4>
+        <p><strong>Agregar semestre a Estudiante:</strong> agrégalo también a <code>EstudianteDisco</code>, cópialo en <code>insertarEstudiante</code> y en el llenado de <code>EstudianteDisco</code> dentro de <code>guardarUniversidad</code> — no hay que tocar el resto del flujo de carga/guardado, ya está genérico.</p>
+        <p style="margin-top:8px;"><strong>Agregar un 4to nivel (ej. Docente por Matricula):</strong> mismo patrón de 3 fases de <code>cargarUniversidad</code> pero con una fase más al final — necesita su propio <code>DocenteDisco</code> con una FK (<code>idMatricula</code>) y se lee <em>después</em> de matrículas, porque ese docente necesita que su matrícula padre ya esté en memoria para engancharse.</p>
+        <p style="margin-top:8px;"><strong>¿Por qué no se puede simplemente agregar el campo a Estudiante sin tocar EstudianteDisco?</strong> Porque <code>write((char*)&amp;struct, sizeof(struct))</code> escribe los bytes tal cual están en memoria — si <code>EstudianteDisco</code> no tiene el campo nuevo, <code>sizeof</code> no lo cuenta y esos bytes nunca llegan al archivo, aunque sí existan en el <code>Estudiante</code> en memoria durante la sesión.</p>
+      </div>
+    </div>
+
+    <!-- ═══════════ BLOQUES PENDIENTES ═══════════ -->
+    <div class="panel" id="panel-b3">
+      <div class="panel-header">
+        <h2>Bloque 3 — Menú y registro</h2>
+        <p>El bucle principal de 14 opciones, y las opciones 1-3 conectadas a las funciones del Bloque 1.</p>
+        <span class="status-badge badge-done">✓ Aprobado — 5% operatividad del menú</span>
+      </div>
+
+      <div class="note note-warn">
+        <span>⚠️</span>
+        <div>La tabla de opciones dice "Registrar matrícula (Primero solicitar el <strong>codigo</strong> del estudiante)", pero la sección "Funcionalidades importantes" dice "Solicita: <strong>Documento</strong> del estudiante, Materia, Fecha, Notas". Nos quedamos con <code>documento</code>: es el identificador que ya usamos en el Bloque 1 (<code>buscarEstudiantePorDocumento</code>) y es el mismo criterio que pide la opción 8 ("Buscar estudiante por documento").</div>
+      </div>
+
+      <div class="explain-grid">
+        <div class="explain-card">
+          <h4>cin >> y cin.getline() no se llevan bien solos</h4>
+          <p>Después de un <code>cin >> variable</code> queda un <code>'\n'</code> pendiente en el buffer. Si el siguiente <code>cin.getline()</code> no lo limpia con <code>cin.ignore()</code>, lee una línea vacía. Por eso cada función de registro alterna: leer número/token con <code>cin >></code>, luego <code>cin.ignore()</code>, luego <code>cin.getline()</code> para lo que sí puede traer espacios (nombre, materia).</p>
+        </div>
+        <div class="explain-card">
+          <h4>El switch salta el 4 a propósito</h4>
+          <p>Como quedó en la Vista general: el enunciado no tiene opción 4, así que el <code>switch</code> simplemente no tiene <code>case 4</code> — cualquier otro número no listado cae en <code>default</code>.</p>
+        </div>
+      </div>
+
+      <div class="code-wrap">
+        <div class="code-header"><span>registrarProgramaMenu()</span><button class="copy-btn">Copiar</button></div>
+        <pre><code>void registrarProgramaMenu(){
+    int codigo;
+    char nombre[50];
+
+    cout &lt;&lt; "Codigo del programa: ";
+    cin &gt;&gt; codigo;
+    cin.ignore();
+    cout &lt;&lt; "Nombre del programa: ";
+    cin.getline(nombre, 50);
+
+    agregarPrograma(codigo, nombre);
+}</code></pre>
+      </div>
+      <div class="explain-card" style="margin:0 0 14px;">
+        <p>La más simple de las tres: pide 2 datos y llama directo a <code>agregarPrograma</code> del Bloque 1. No valida nada acá — la validación de "código único" vive dentro de <code>agregarPrograma</code>, esta función solo lee de consola.</p>
+      </div>
+
+      <div class="code-wrap">
+        <div class="code-header"><span>registrarEstudianteMenu()</span><button class="copy-btn">Copiar</button></div>
+        <pre><code>void registrarEstudianteMenu(){
+    int codigoPrograma;
+    char nombre[50], documento[20], telefono[20];
+
+    cout &lt;&lt; "Codigo del programa: ";
+    cin &gt;&gt; codigoPrograma;
+    cin.ignore();
+    cout &lt;&lt; "Nombre: ";
+    cin.getline(nombre, 50);
+    cout &lt;&lt; "Documento: ";
+    cin.getline(documento, 20);
+    cout &lt;&lt; "Telefono: ";
+    cin.getline(telefono, 20);
+
+    agregarEstudiante(codigoPrograma, nombre, documento, telefono);
+}</code></pre>
+      </div>
+      <div class="explain-card" style="margin:0 0 14px;">
+        <p>Un solo <code>cin >></code> al principio (el código, que es número) seguido de un único <code>cin.ignore()</code> — después de eso, todo lo demás es texto y se lee con <code>cin.getline()</code> sin volver a mezclar con <code>cin >></code>.</p>
+      </div>
+
+      <div class="code-wrap">
+        <div class="code-header"><span>registrarMatriculaMenu() — datos de la materia y la fecha</span><button class="copy-btn">Copiar</button></div>
+        <pre><code>void registrarMatriculaMenu(){
+    char documento[20];
+    char codigoMateria[10], nombreMateria[40];
+    Fecha fecha;
+    float notas[3];
+
+    cout &lt;&lt; "Documento del estudiante: ";
+    cin.getline(documento, 20);
+
+    cout &lt;&lt; "Codigo de la materia: ";
+    cin &gt;&gt; codigoMateria;
+    cin.ignore();
+    cout &lt;&lt; "Nombre de la materia: ";
+    cin.getline(nombreMateria, 40);
+
+    cout &lt;&lt; "Fecha - Anio (aaaa): ";
+    cin &gt;&gt; fecha.anio;
+    cout &lt;&lt; "Fecha - Mes (mm): ";
+    cin &gt;&gt; fecha.mes;
+    cout &lt;&lt; "Fecha - Dia (dd): ";
+    cin &gt;&gt; fecha.dia;</code></pre>
+      </div>
+      <div class="explain-card" style="margin:0 0 16px;">
+        <p><code>documento</code> se lee de primero con <code>cin.getline</code> directo porque ya viene de un <code>cin.ignore()</code> anterior (el del menú principal). <code>cin >> fecha.anio</code> funciona porque <code>cin >></code> sobre un <code>char[]</code> corta en el primer espacio — no hace falta <code>getline</code> para un año/mes/día sin espacios.</p>
+      </div>
+
+      <div class="code-wrap">
+        <div class="code-header"><span>registrarMatriculaMenu() — las 3 notas y el llamado final</span><button class="copy-btn">Copiar</button></div>
+        <pre><code>    for (int i = 0; i &lt; 3; i++){
+        cout &lt;&lt; "Nota " &lt;&lt; (i + 1) &lt;&lt; " (0.0 a 5.0): ";
+        cin &gt;&gt; notas[i];
+    }
+    cin.ignore();
+
+    agregarMatricula(documento, codigoMateria, nombreMateria, fecha, notas);
+}</code></pre>
+      </div>
+      <div class="explain-card" style="margin:0 0 16px;">
+        <p>Un <code>for</code> de 3 vueltas en vez de 3 líneas repetidas para las notas. El <code>cin.ignore()</code> final limpia el <code>'\n'</code> que deja la última nota, antes de volver al <code>cin.getline(documento, 20)</code> del siguiente registro. El rango 0.0–5.0 no se valida aquí: se valida dentro de <code>agregarMatricula</code> (Bloque 1), esta función solo recolecta datos.</p>
+      </div>
+
+      <hr class="divider">
+
+      <div class="code-wrap">
+        <div class="code-header"><span>mostrarMenu()</span><button class="copy-btn">Copiar</button></div>
+        <pre><code>void mostrarMenu(){
+    cout &lt;&lt; "\n======================================" &lt;&lt; endl;
+    cout &lt;&lt; " 1. Registrar programa" &lt;&lt; endl;
+    cout &lt;&lt; " 2. Registrar estudiante" &lt;&lt; endl;
+    cout &lt;&lt; " 3. Registrar matricula" &lt;&lt; endl;
+    cout &lt;&lt; " 5. Carga masiva de estudiantes" &lt;&lt; endl;
+    cout &lt;&lt; " 6. Listar programas" &lt;&lt; endl;
+    cout &lt;&lt; " 7. Listar estudiantes por programa" &lt;&lt; endl;
+    cout &lt;&lt; " 8. Buscar estudiante por documento" &lt;&lt; endl;
+    cout &lt;&lt; " 9. Mostrar historial academico" &lt;&lt; endl;
+    cout &lt;&lt; "10. Generar reporte de programas" &lt;&lt; endl;
+    cout &lt;&lt; "11. Generar reporte de estudiantes" &lt;&lt; endl;
+    cout &lt;&lt; "12. Generar reporte de matriculas" &lt;&lt; endl;
+    cout &lt;&lt; "13. Reporte de promedios" &lt;&lt; endl;
+    cout &lt;&lt; "14. Salir" &lt;&lt; endl;
+    cout &lt;&lt; "======================================" &lt;&lt; endl;
+    cout &lt;&lt; "Digite opcion: ";
+}</code></pre>
+      </div>
+      <div class="explain-card" style="margin:0 0 16px;">
+        <p>Solo imprime — no lee nada ni toma decisiones. Se separa de <code>main()</code> para que el bucle principal no se llene de <code>cout</code> repetidos; el número de cada opción es fijo porque el <code>switch</code> de abajo depende exactamente de esos números.</p>
+      </div>
+
+      <div class="code-wrap">
+        <div class="code-header"><span>main() — 1. Cargar datos y arrancar el ciclo</span><button class="copy-btn">Copiar</button></div>
+        <pre><code>int main(){
+    cargarUniversidad();
+
+    int opcion;
+    do{
+        mostrarMenu();
+        cin &gt;&gt; opcion;
+        cin.ignore();</code></pre>
+      </div>
+      <div class="explain-card" style="margin:0 0 16px;">
+        <p><code>cargarUniversidad()</code> (Bloque 2) se llama una sola vez, antes del ciclo — así la universidad ya tiene en memoria lo que había en los <code>.dat</code> desde el primer <code>mostrarMenu()</code>. Es <code>do-while</code> y no <code>while</code> porque el menú tiene que mostrarse al menos una vez sí o sí, antes de poder preguntar si la opción fue 14.</p>
+      </div>
+
+      <div class="code-wrap">
+        <div class="code-header"><span>main() — 2. El switch y la salida</span><button class="copy-btn">Copiar</button></div>
+        <pre><code>        switch (opcion){
+            case 1: registrarProgramaMenu(); break;
+            case 2: registrarEstudianteMenu(); break;
+            case 3: registrarMatriculaMenu(); break;
+            case 5: cout &lt;&lt; "Opcion pendiente (Bloque 4)." &lt;&lt; endl; break;
+            case 6: cout &lt;&lt; "Opcion pendiente (Bloque 5)." &lt;&lt; endl; break;
+            case 7: cout &lt;&lt; "Opcion pendiente (Bloque 5)." &lt;&lt; endl; break;
+            case 8: cout &lt;&lt; "Opcion pendiente (Bloque 5)." &lt;&lt; endl; break;
+            case 9: cout &lt;&lt; "Opcion pendiente (Bloque 5)." &lt;&lt; endl; break;
+            case 10: cout &lt;&lt; "Opcion pendiente (Bloque 6)." &lt;&lt; endl; break;
+            case 11: cout &lt;&lt; "Opcion pendiente (Bloque 6)." &lt;&lt; endl; break;
+            case 12: cout &lt;&lt; "Opcion pendiente (Bloque 6)." &lt;&lt; endl; break;
+            case 13: cout &lt;&lt; "Opcion pendiente (Bloque 6)." &lt;&lt; endl; break;
+            case 14:
+                guardarUniversidad();
+                liberarMemoria();
+                cout &lt;&lt; "Hasta luego." &lt;&lt; endl;
+                break;
+            default:
+                cout &lt;&lt; "Opcion invalida." &lt;&lt; endl;
+        }
+    } while (opcion != 14);
+
+    return 0;
+}</code></pre>
+      </div>
+      <div class="explain-card" style="margin:0 0 16px;">
+        <p>Cada <code>case</code> es una sola línea que delega a otra función — <code>main()</code> nunca hace la lógica de negocio directamente. Las opciones 5 a 13 son placeholders temporales que se van reemplazando bloque por bloque. <code>case 14</code> es el único con varias instrucciones: guarda antes de liberar (si liberara primero, ya no habría nada que guardar), y no tiene <code>break</code> extra porque es el último caso antes de salir del <code>switch</code> de todas formas.</p>
+      </div>
+
+      <div class="note note-ok">
+        <span>✅</span>
+        <div>Las opciones 5 a 13 quedan con un mensaje "pendiente" temporal — se reemplazan una por una en los Bloques 4, 5 y 6 sin tocar el resto del <code>switch</code>. El main() de prueba del Bloque 2 ya cumplió su función y se reemplazó por este bucle real.</div>
+      </div>
+
+      <div class="sust-card">
+        <h4>🎤 Preguntas típicas de sustentación</h4>
+        <div class="qa">
+          <div class="q">¿Por qué cin.ignore() después de cada cin >> ?</div>
+          <div class="a"><code>cin >></code> deja el salto de línea sin consumir en el buffer. Si el siguiente <code>cin.getline()</code> no lo limpia primero, se ejecuta con una cadena vacía en vez de esperar la entrada del usuario — es el error clásico de mezclar lectura de números y de texto.</div>
+        </div>
+        <div class="qa">
+          <div class="q">¿Por qué la opción 14 llama guardarUniversidad() y liberarMemoria() y no al revés?</div>
+          <div class="a">Si liberas primero, ya no queda información en memoria para escribir en los .dat. El orden tiene que ser: primero persistir lo que hay, después liberarlo.</div>
+        </div>
+        <div class="qa">
+          <div class="q">¿Qué pasa si el usuario mete letras donde se espera un número?</div>
+          <div class="a"><code>cin</code> entra en estado de fallo y el bucle puede comportarse mal. El enunciado no pide manejarlo explícitamente y el curso no lo cubre en los ejemplos vistos, pero si lo preguntan: se resuelve agregando <code>cin.clear(); cin.ignore(10000,'\n');</code> cuando <code>cin.fail()</code> es verdadero.</div>
+        </div>
+      </div>
+
+      <div class="new-func">
+        <h4>🔧 Si te piden una opción de menú nueva</h4>
+        <p><strong>El patrón general:</strong> una función <code>xxxMenu()</code> que solo hace <code>cin</code>/<code>cin.getline()</code> para pedir datos y después llama a la función de lógica correspondiente (nunca mezcles la lectura de consola con la lógica de negocio) — y un <code>case</code> nuevo en el <code>switch</code> que la llama.</p>
+        <p style="margin-top:8px;"><strong>Si la opción nueva no necesita leer nada</strong> (ej. "15. Mostrar estadísticas"): no hace falta una función <code>xxxMenu()</code> separada — el <code>case</code> del <code>switch</code> puede llamar directo a la función de lógica, como ya hacen las opciones 6 y 9 (<code>listarProgramas()</code>, <code>mostrarHistorial()</code>).</p>
+        <p style="margin-top:8px;"><strong>Cómo probar que quedó bien conectada:</strong> agregar el número en <code>mostrarMenu()</code> (el <code>cout</code>), agregar el <code>case</code> en el <code>switch</code>, y compilar — si falta cualquiera de los dos, o el programa no muestra la opción, o la elige y cae en <code>default</code> ("Opcion invalida").</p>
+      </div>
+    </div>
+    <div class="panel" id="panel-b4">
+      <div class="panel-header">
+        <h2>Bloque 4 — Carga masiva CSV</h2>
+        <p>Leer estudiantes.csv, crear los programas que falten y agregar estudiantes en memoria — opción 5 del menú.</p>
+        <span class="status-badge badge-done">✓ Aprobado — 10% de la rúbrica de persistencia (importación CSV)</span>
+      </div>
+
+      <div class="note note-info">
+        <span>📋</span>
+        <div>Formato del archivo: <code>codigoPrograma,nombrePrograma,idEstudiante,nombre,documento,telefono</code> · "La aplicación debe: leer el TXT, crear los programas si no existen, agregar estudiantes en memoria."</div>
+      </div>
+
+      <div class="note note-ok">
+        <span>📦</span>
+        <div><strong>Entregable:</strong> <code>estudiantes.csv</code> tiene que ir en la misma carpeta que el <code>.cpp</code> al momento de sustentar — sin él, la opción 5 no tiene con qué probarse. Se entrega con los 3 registros de ejemplo del enunciado (programas 101 y 102).</div>
+      </div>
+
+      <p style="color:#7b8290;font-size:12px;margin:14px 0 4px;">La función completa tiene 5 partes. Cada una se explica por separado antes de verla junta.</p>
+
+      <!-- PASO 1 -->
+      <div class="code-wrap">
+        <div class="code-header"><span>1. Abrir el archivo</span><button class="copy-btn">Copiar</button></div>
+        <pre><code>ifstream archivo("estudiantes.csv");
+if (!archivo.is_open()){
+    cout &lt;&lt; "No se pudo abrir el archivo estudiantes.csv" &lt;&lt; endl;
+    return;
+}</code></pre>
+      </div>
+      <div class="explain-card" style="margin:0 0 16px;">
+        <h4>Por qué se valida is_open()</h4>
+        <p><code>ifstream</code> no lanza error si el archivo no existe: simplemente el objeto queda en un estado "fallido" pero el programa sigue corriendo. Si no se corta con <code>return</code> aquí, el <code>while</code> de abajo ni siquiera entraría (una lectura sobre un stream fallido devuelve falso de inmediato) — pero sin este aviso, el estudiante vería "Carga masiva completada. Estudiantes importados: 0" sin saber por qué.</p>
+      </div>
+
+      <!-- PASO 2 -->
+      <div class="code-wrap">
+        <div class="code-header"><span>2. Leer línea por línea y separar los 6 campos</span><button class="copy-btn">Copiar</button></div>
+        <pre><code>char linea[200];
+int importados = 0;
+
+while (archivo.getline(linea, 200)){
+    if (strlen(linea) == 0) continue;
+
+    char *token = strtok(linea, ",");
+    int codigoPrograma = atoi(token);
+    token = strtok(nullptr, ",");
+    char nombrePrograma[50];
+    strcpy(nombrePrograma, token);
+    token = strtok(nullptr, ",");
+    int idEstudiante = atoi(token);
+    token = strtok(nullptr, ",");
+    char nombre[50];
+    strcpy(nombre, token);
+    token = strtok(nullptr, ",");
+    char documento[20];
+    strcpy(documento, token);
+    token = strtok(nullptr, ",");
+    char telefono[20];
+    strcpy(telefono, token);</code></pre>
+      </div>
+      <div class="explain-grid">
+        <div class="explain-card">
+          <h4>archivo.getline(linea, 200)</h4>
+          <p>Lee todos los caracteres hasta el próximo <code>'\n'</code> (o hasta 200) y los mete en <code>linea</code>, sin guardar el salto de línea. Devuelve el propio <code>ifstream</code>, que en un <code>if</code>/<code>while</code> se evalúa como <code>true</code> mientras la lectura funcionó — cuando ya no hay más líneas, se evalúa <code>false</code> y el <code>while</code> termina solo.</p>
+        </div>
+        <div class="explain-card">
+          <h4>Un strtok() por columna, en orden</h4>
+          <p><code>strtok(linea, ",")</code> solo se llama <strong>una vez</strong>, para arrancar con la línea nueva y sacar el primer campo (<code>codigoPrograma</code>). Las otras cinco llamadas usan <code>strtok(nullptr, ",")</code>: le dicen a <code>strtok</code> "seguí cortando donde quedaste la vez pasada". El orden de las 6 llamadas tiene que calzar exacto con el orden de columnas del CSV.</p>
+        </div>
+        <div class="explain-card">
+          <h4>atoi() vs strcpy()</h4>
+          <p><code>token</code> siempre es <code>char*</code> — el pedazo de texto entre comas. Si el campo es numérico (<code>codigoPrograma</code>, <code>idEstudiante</code>) se convierte con <code>atoi</code> a <code>int</code>. Si es texto (<code>nombrePrograma</code>, <code>nombre</code>, <code>documento</code>, <code>telefono</code>) se copia tal cual con <code>strcpy</code> a un <code>char[]</code> del struct.</p>
+        </div>
+        <div class="explain-card">
+          <h4>if (strlen(linea) == 0) continue;</h4>
+          <p>Salta líneas vacías (por ejemplo, una línea en blanco al final del archivo) antes de intentar tokenizarlas — si <code>strtok</code> recibe una cadena vacía, el primer <code>token</code> sale <code>nullptr</code> y el <code>atoi(token)</code> siguiente explota.</p>
+        </div>
+      </div>
+
+      <!-- PASO 3 -->
+      <div class="code-wrap">
+        <div class="code-header"><span>3. Crear el programa si no existe</span><button class="copy-btn">Copiar</button></div>
+        <pre><code>    Programa *programa = buscarPrograma(codigoPrograma);
+    if (programa == nullptr){
+        agregarPrograma(codigoPrograma, nombrePrograma);
+        programa = buscarPrograma(codigoPrograma);
+    }</code></pre>
+      </div>
+      <div class="explain-card" style="margin:0 0 16px;">
+        <h4>Por qué buscarPrograma() se llama dos veces</h4>
+        <p>Primero se busca para saber si ya existe. Si no existe, <code>agregarPrograma</code> (la del Bloque 1) reserva un arreglo <code>new</code> de un espacio más, copia los programas viejos ahí y hace <code>delete[]</code> del arreglo original — la variable <code>programa</code> de antes quedó apuntando a memoria ya liberada. Por eso se vuelve a buscar: ahora sí devuelve un puntero válido, al arreglo nuevo.</p>
+      </div>
+
+      <!-- PASO 4 -->
+      <div class="code-wrap">
+        <div class="code-header"><span>4. Evitar documentos duplicados</span><button class="copy-btn">Copiar</button></div>
+        <pre><code>    if (buscarEstudiantePorDocumento(documento) != nullptr){
+        cout &lt;&lt; "Documento " &lt;&lt; documento &lt;&lt; " ya existe, se omite." &lt;&lt; endl;
+        continue;
+    }</code></pre>
+      </div>
+      <div class="explain-card" style="margin:0 0 16px;">
+        <h4>continue, no return</h4>
+        <p>Reutiliza la misma <code>buscarEstudiantePorDocumento</code> del Bloque 1 (la regla de unicidad es la misma, venga el dato de consola o de archivo). <code>continue</code> corta solo esta vuelta del <code>while</code> y pasa a la línea siguiente del CSV — un <code>return</code> aquí cortaría toda la carga masiva por una sola fila repetida.</p>
+      </div>
+
+      <!-- PASO 5 -->
+      <div class="code-wrap">
+        <div class="code-header"><span>5. Insertar el estudiante con su ID original y cerrar</span><button class="copy-btn">Copiar</button></div>
+        <pre><code>    insertarEstudiante(programa, idEstudiante, nombre, documento, telefono);
+    importados++;
+}
+
+archivo.close();
+cout &lt;&lt; "Carga masiva completada. Estudiantes importados: " &lt;&lt; importados &lt;&lt; endl;</code></pre>
+      </div>
+      <div class="explain-card" style="margin:0 0 16px;">
+        <h4>insertarEstudiante, no agregarEstudiante</h4>
+        <p><code>agregarEstudiante</code> llama a <code>generarIdEstudiante()</code> por dentro y le asignaría un ID aleatorio nuevo, ignorando el <code>idEstudiante</code> que trae el CSV. <code>insertarEstudiante</code> es la versión "mecánica" (crece el arreglo, copia, hace <code>delete[]</code>) que ya existía del Bloque 2 para recargar desde el <code>.dat</code> — aquí se reutiliza para respetar el ID que ya viene definido en el archivo.</p>
+      </div>
+
+      <hr class="divider">
+
+      <div class="code-wrap">
+        <div class="code-header"><span>cargaMasivaEstudiantes() — función completa</span><button class="copy-btn">Copiar</button></div>
+        <pre><code>void cargaMasivaEstudiantes(){
+    ifstream archivo("estudiantes.csv");
+    if (!archivo.is_open()){
+        cout &lt;&lt; "No se pudo abrir el archivo estudiantes.csv" &lt;&lt; endl;
+        return;
+    }
+
+    char linea[200];
+    int importados = 0;
+
+    while (archivo.getline(linea, 200)){
+        if (strlen(linea) == 0) continue;
+
+        char *token = strtok(linea, ",");
+        int codigoPrograma = atoi(token);
+        token = strtok(nullptr, ",");
+        char nombrePrograma[50];
+        strcpy(nombrePrograma, token);
+        token = strtok(nullptr, ",");
+        int idEstudiante = atoi(token);
+        token = strtok(nullptr, ",");
+        char nombre[50];
+        strcpy(nombre, token);
+        token = strtok(nullptr, ",");
+        char documento[20];
+        strcpy(documento, token);
+        token = strtok(nullptr, ",");
+        char telefono[20];
+        strcpy(telefono, token);
+
+        // crea el programa si no existe (mismo agregarPrograma del Bloque 1)
+        Programa *programa = buscarPrograma(codigoPrograma);
+        if (programa == nullptr){
+            agregarPrograma(codigoPrograma, nombrePrograma);
+            programa = buscarPrograma(codigoPrograma); // el puntero anterior quedo invalido tras el new de agregarPrograma
+        }
+
+        // documento unico en toda la universidad: si ya existe, se omite esa fila
+        if (buscarEstudiantePorDocumento(documento) != nullptr){
+            cout &lt;&lt; "Documento " &lt;&lt; documento &lt;&lt; " ya existe, se omite." &lt;&lt; endl;
+            continue;
+        }
+
+        // insertarEstudiante (no agregarEstudiante): el CSV ya trae el ID, no se genera uno nuevo
+        insertarEstudiante(programa, idEstudiante, nombre, documento, telefono);
+        importados++;
+    }
+
+    archivo.close();
+    cout &lt;&lt; "Carga masiva completada. Estudiantes importados: " &lt;&lt; importados &lt;&lt; endl;
+}</code></pre>
+      </div>
+
+      <div class="note note-warn">
+        <span>⚠️</span>
+        <div>El enunciado nombra el archivo <code>estudiantes.csv</code> pero en la misma frase lo llama "el TXT" — es el mismo archivo de texto plano separado por comas, <code>ifstream</code> lo abre igual sin importar la extensión. No se validó formato de línea corrupta (columna faltante) porque el curso no cubrió manejo de errores de <code>strtok</code> a este nivel.</div>
+      </div>
+
+      <div class="sust-card">
+        <h4>🎤 Preguntas típicas de sustentación</h4>
+        <div class="qa">
+          <div class="q">¿Por qué usas atoi() en vez de leer directamente un int con cin?</div>
+          <div class="a"><code>strtok</code> devuelve un <code>char*</code> (el texto del campo, ej. <code>"101"</code>), no un número. <code>atoi</code> convierte esa cadena de caracteres a <code>int</code>. No se puede leer con <code>cin</code> porque el dato no viene de consola, viene de un archivo ya cargado en memoria.</div>
+        </div>
+        <div class="qa">
+          <div class="q">¿Qué pasa si llamas strtok(linea, ",") dos veces seguidas?</div>
+          <div class="a">Reinicia el corte desde el principio de <code>linea</code> y devuelve otra vez el primer token — por eso solo la primera llamada de cada línea usa <code>linea</code>, todas las siguientes usan <code>nullptr</code> para continuar cortando la misma cadena donde se quedó.</div>
+        </div>
+        <div class="qa">
+          <div class="q">¿Por qué no reutilizas agregarEstudiante() en vez de insertarEstudiante()?</div>
+          <div class="a"><code>agregarEstudiante</code> llama a <code>generarIdEstudiante()</code> internamente y descarta el ID que trae el CSV. Como el archivo ya asigna un ID por estudiante, hay que usar la función que respeta un ID externo — la misma razón por la que <code>cargarUniversidad()</code> del Bloque 2 tampoco usa <code>agregarEstudiante</code>.</div>
+        </div>
+      </div>
+
+      <div class="new-func">
+        <h4>🔧 Si te piden validar más columnas del CSV</h4>
+        <p><strong>Rechazar teléfono con menos de 10 dígitos:</strong> se valida justo después de hacer <code>strcpy(telefono, token)</code> y antes de llegar a <code>insertarEstudiante</code> — si falla la validación, <code>cout</code> del error y <code>continue</code> para pasar a la siguiente línea, igual que se hizo con el documento duplicado.</p>
+        <p style="margin-top:8px;"><strong>Manejar una línea con columnas de menos (strtok devuelve nullptr):</strong> después de cada <code>token = strtok(nullptr, ",")</code> se puede chequear <code>if (token == nullptr) { cout &lt;&lt; "Linea invalida, se omite." &lt;&lt; endl; continue; }</code> antes de usarlo — igual de importante en <code>atoi</code>/<code>strcpy</code> del campo siguiente, porque llamarlos con <code>nullptr</code> revienta el programa.</p>
+        <p style="margin-top:8px;"><strong>Cargar desde un archivo con nombre distinto:</strong> cambia solo el string del <code>ifstream archivo("estudiantes.csv")</code> — toda la lógica de tokenizar y validar queda igual, porque no depende del nombre del archivo.</p>
+      </div>
+    </div>
+    <div class="panel" id="panel-b5">
+      <div class="panel-header">
+        <h2>Bloque 5 — Listados y búsqueda</h2>
+        <p>Opciones 6 a 9: listar programas, listar estudiantes de un programa, buscar por documento y el historial escalonado completo.</p>
+        <span class="status-badge badge-done">✓ Aprobado</span>
+      </div>
+
+      <div class="code-wrap">
+        <div class="code-header"><span>6. listarProgramas()</span><button class="copy-btn">Copiar</button></div>
+        <pre><code>void listarProgramas(){
+    cout &lt;&lt; "\n===== Listado de programas =====" &lt;&lt; endl;
+    if (universidad.programasCount == 0){
+        cout &lt;&lt; "No hay programas registrados." &lt;&lt; endl;
+        return;
+    }
+    for (int p = 0; p &lt; universidad.programasCount; p++){
+        Programa &amp;prog = universidad.programas[p];
+        cout &lt;&lt; "Codigo: " &lt;&lt; prog.codigo &lt;&lt; " - Nombre: " &lt;&lt; prog.nombre
+             &lt;&lt; " - Estudiantes matriculados: " &lt;&lt; prog.estudiantesCount &lt;&lt; endl;
+    }
+}</code></pre>
+      </div>
+      <div class="explain-card" style="margin:0 0 16px;">
+        <p>"Todos los datos del programa sin los estudiantes" se lee como: mostrar los campos propios de <code>Programa</code> (código, nombre) sin desglosar cada <code>Estudiante</code> del arreglo — <code>estudiantesCount</code> es un número, no la lista de estudiantes en sí, así que sí se incluye como dato resumen.</p>
+      </div>
+
+      <div class="code-wrap">
+        <div class="code-header"><span>7. listarEstudiantesPorProgramaMenu()</span><button class="copy-btn">Copiar</button></div>
+        <pre><code>void listarEstudiantesPorProgramaMenu(){
+    int codigo;
+    cout &lt;&lt; "Codigo del programa: ";
+    cin &gt;&gt; codigo;
+    cin.ignore();
+
+    Programa *programa = buscarPrograma(codigo);
+    if (programa == nullptr){
+        cout &lt;&lt; "No existe un programa con codigo " &lt;&lt; codigo &lt;&lt; endl;
+        return;
+    }
+
+    cout &lt;&lt; "\n===== Programa: " &lt;&lt; programa-&gt;nombre &lt;&lt; " (Codigo " &lt;&lt; programa-&gt;codigo &lt;&lt; ") =====" &lt;&lt; endl;
+    cout &lt;&lt; "Cantidad de estudiantes: " &lt;&lt; programa-&gt;estudiantesCount &lt;&lt; endl;
+    for (int e = 0; e &lt; programa-&gt;estudiantesCount; e++){
+        Estudiante &amp;est = programa-&gt;estudiantes[e];
+        cout &lt;&lt; "  ID: " &lt;&lt; est.id &lt;&lt; " - Nombre: " &lt;&lt; est.nombre
+             &lt;&lt; " - Documento: " &lt;&lt; est.documento &lt;&lt; " - Telefono: " &lt;&lt; est.telefono &lt;&lt; endl;
+    }
+}</code></pre>
+      </div>
+      <div class="explain-card" style="margin:0 0 16px;">
+        <p>"Todos los datos del programa <strong>con</strong> los estudiantes, sin las matrículas": reutiliza <code>buscarPrograma</code> del Bloque 1 para llegar al struct, recorre <code>programa-&gt;estudiantes</code> mostrando sus datos propios (id, nombre, documento, teléfono) pero nunca entra al arreglo <code>matriculas</code> de cada uno — esa parte es la opción 9.</p>
+      </div>
+
+      <div class="code-wrap">
+        <div class="code-header"><span>8. buscarEstudianteMenu() — recorrido y datos personales</span><button class="copy-btn">Copiar</button></div>
+        <pre><code>void buscarEstudianteMenu(){
+    char documento[20];
+    cout &lt;&lt; "Documento del estudiante: ";
+    cin.getline(documento, 20);
+
+    for (int p = 0; p &lt; universidad.programasCount; p++){
+        Programa &amp;prog = universidad.programas[p];
+        for (int e = 0; e &lt; prog.estudiantesCount; e++){
+            Estudiante &amp;est = prog.estudiantes[e];
+            if (strcmp(est.documento, documento) == 0){
+                cout &lt;&lt; "\n===== Estudiante encontrado =====" &lt;&lt; endl;
+                cout &lt;&lt; "ID: " &lt;&lt; est.id &lt;&lt; endl;
+                cout &lt;&lt; "Nombre: " &lt;&lt; est.nombre &lt;&lt; endl;
+                cout &lt;&lt; "Documento: " &lt;&lt; est.documento &lt;&lt; endl;
+                cout &lt;&lt; "Telefono: " &lt;&lt; est.telefono &lt;&lt; endl;
+                cout &lt;&lt; "Programa: " &lt;&lt; prog.nombre &lt;&lt; " (Codigo " &lt;&lt; prog.codigo &lt;&lt; ")" &lt;&lt; endl;</code></pre>
+      </div>
+      <div class="explain-card" style="margin:0 0 16px;">
+        <p>No se pudo reutilizar <code>buscarEstudiantePorDocumento</code> del Bloque 1 tal cual: esa función devuelve solo <code>Estudiante*</code>, pero acá también hace falta saber a qué <code>Programa</code> pertenece (el <code>Estudiante</code> no guarda un puntero de vuelta a su programa) — por eso el recorrido de los dos <code>for</code> se repite acá completo, guardando la referencia <code>prog</code> junto con <code>est</code>.</p>
+      </div>
+
+      <div class="code-wrap">
+        <div class="code-header"><span>8. buscarEstudianteMenu() — materias y promedio general</span><button class="copy-btn">Copiar</button></div>
+        <pre><code>                cout &lt;&lt; "Materias matriculadas:" &lt;&lt; endl;
+                float sumaDefinitivas = 0;
+                for (int m = 0; m &lt; est.matriculasCount; m++){
+                    Matricula &amp;mat = est.matriculas[m];
+                    cout &lt;&lt; "  " &lt;&lt; mat.codigoMateria &lt;&lt; " - " &lt;&lt; mat.nombreMateria
+                         &lt;&lt; " - Definitiva: " &lt;&lt; mat.definitiva &lt;&lt; endl;
+                    sumaDefinitivas += mat.definitiva;
+                }
+
+                if (est.matriculasCount &gt; 0){
+                    cout &lt;&lt; "Promedio general: " &lt;&lt; fixed &lt;&lt; setprecision(2)
+                         &lt;&lt; (sumaDefinitivas / est.matriculasCount) &lt;&lt; endl;
+                } else {
+                    cout &lt;&lt; "El estudiante aun no tiene materias matriculadas." &lt;&lt; endl;
+                }
+                return;
+            }
+        }
+    }
+    cout &lt;&lt; "No se encontro un estudiante con el documento " &lt;&lt; documento &lt;&lt; endl;
+}</code></pre>
+      </div>
+      <div class="explain-card" style="margin:0 0 16px;">
+        <p>El promedio general no es <code>definitiva</code> de una materia (eso ya lo calcula <code>agregarMatricula</code>): es el promedio de todas las <code>definitiva</code>s del estudiante, acumulado en el mismo <code>for</code> que las imprime — una sola pasada, sin recorrer <code>matriculas</code> dos veces. El <code>if (matriculasCount &gt; 0)</code> evita dividir entre cero si el estudiante todavía no tiene ninguna matrícula. El <code>return</code> dentro del doble <code>for</code> corta la búsqueda apenas encuentra coincidencia — si termina los dos ciclos sin encontrar nada, cae en el mensaje de "no encontrado" de la última línea.</p>
+      </div>
+
+      <div class="code-wrap">
+        <div class="code-header"><span>9. mostrarHistorial()</span><button class="copy-btn">Copiar</button></div>
+        <pre><code>void mostrarHistorial(){
+    cout &lt;&lt; "\n===== Historial academico =====" &lt;&lt; endl;
+    for (int p = 0; p &lt; universidad.programasCount; p++){
+        Programa &amp;prog = universidad.programas[p];
+        cout &lt;&lt; "Programa: " &lt;&lt; prog.nombre &lt;&lt; " (Codigo " &lt;&lt; prog.codigo &lt;&lt; ")" &lt;&lt; endl;
+
+        for (int e = 0; e &lt; prog.estudiantesCount; e++){
+            Estudiante &amp;est = prog.estudiantes[e];
+            cout &lt;&lt; "  Estudiante: " &lt;&lt; est.nombre &lt;&lt; " (Documento " &lt;&lt; est.documento &lt;&lt; ")" &lt;&lt; endl;
+
+            for (int m = 0; m &lt; est.matriculasCount; m++){
+                Matricula &amp;mat = est.matriculas[m];
+                cout &lt;&lt; "    Matricula: " &lt;&lt; mat.codigoMateria &lt;&lt; " - " &lt;&lt; mat.nombreMateria
+                     &lt;&lt; " - Definitiva: " &lt;&lt; mat.definitiva &lt;&lt; endl;
+            }
+        }
+    }
+}</code></pre>
+      </div>
+      <div class="explain-card" style="margin:0 0 16px;">
+        <p>"Forma escalonada" = 3 <code>for</code> anidados con más espacios de indentación (<code>"  "</code>, luego <code>"    "</code>) por cada nivel que se baja — Programa sin sangría, Estudiante con 2 espacios, Matrícula con 4. Es el mismo recorrido de 3 niveles que ya usa <code>guardarUniversidad</code> del Bloque 2, aquí solo imprime en vez de escribir a archivo.</p>
+      </div>
+
+      <div class="sust-card">
+        <h4>🎤 Preguntas típicas de sustentación</h4>
+        <div class="qa">
+          <div class="q">¿Por qué buscarEstudianteMenu no usa buscarEstudiantePorDocumento?</div>
+          <div class="a">Porque además del <code>Estudiante</code> necesita el <code>Programa</code> al que pertenece para mostrarlo, y <code>Estudiante</code> no tiene un puntero de vuelta a su <code>Programa</code> — solo la relación va en un sentido (Programa → Estudiante). Por eso el recorrido de dos niveles se repite completo dentro de la función.</div>
+        </div>
+        <div class="qa">
+          <div class="q">¿Cómo calculas el promedio general de un estudiante?</div>
+          <div class="a">Sumando la <code>definitiva</code> de cada una de sus matrículas y dividiendo entre <code>matriculasCount</code> — no es un dato guardado, se calcula al momento de consultarlo.</div>
+        </div>
+      </div>
+
+      <div class="new-func">
+        <h4>🔧 Si te piden un listado o búsqueda nueva</h4>
+        <p><strong>Listar estudiantes por rango de promedio:</strong> mismo esqueleto de <code>buscarEstudianteMenu</code> pero sin <code>return</code> temprano — recorre los 3 niveles, calcula el promedio de cada estudiante (igual que en la opción 8) y solo imprime si cae dentro del rango pedido.</p>
+        <p style="margin-top:8px;"><strong>Buscar por nombre en vez de documento:</strong> mismo recorrido de dos <code>for</code> anidados de <code>buscarEstudianteMenu</code>, cambiando la condición <code>strcmp(est.documento, documento) == 0</code> por <code>strstr(est.nombre, textoBuscado) != nullptr</code> (coincidencia parcial) — y quitando el <code>return</code> si quieres que muestre <em>todos</em> los que coincidan, no solo el primero.</p>
+        <p style="margin-top:8px;"><strong>Listar programas ordenados por cantidad de estudiantes:</strong> no es un recorrido nuevo, es <code>listarProgramas()</code> + un ordenamiento antes de imprimir — como no se puede usar <code>vector</code>, se ordena el arreglo <code>universidad.programas</code> in-place con burbuja simple comparando <code>estudiantesCount</code>, y ahí sí se imprime.</p>
+      </div>
+    </div>
+    <div class="panel" id="panel-b6">
+      <div class="panel-header">
+        <h2>Bloque 6 — Reportes TXT</h2>
+        <p>Opciones 10 a 13: los mismos 3 recorridos del Bloque 5, pero escribiendo a archivo en vez de a consola, más el reporte de promedios.</p>
+        <span class="status-badge badge-done">✓ Aprobado — 10% de la rúbrica de persistencia (reportes TXT)</span>
+      </div>
+
+      <div class="note note-warn">
+        <span>⚠️</span>
+        <div>Dos cosas del enunciado que no calzan literal:
+        <br>1) Nombra los archivos <code>programas_XXXX.txt</code> / <code>estudiantes_XXXX.txt</code> / <code>matriculas_XXXX.txt</code> — el <code>XXXX</code> no se explica en ningún lado (¿fecha? ¿consecutivo?) y el curso no vio generación de timestamps. Se usó el nombre base sin sufijo (<code>programas.txt</code>, etc.), igual que <code>reporte_promedios.txt</code> que sí viene sin <code>XXXX</code> en el enunciado.
+        <br>2) La opción 11 dice "similar a la opción 6" (listar <em>programas</em>), pero es "Generar reporte de <em>estudiantes</em>" — el contenido tiene que ser de estudiantes, así que se modeló sobre la opción 7 (listar estudiantes), no la 6. Probable error de tipeo en el enunciado (6 en vez de 7).</div>
+      </div>
+
+      <div class="code-wrap">
+        <div class="code-header"><span>10. generarReporteProgramas()</span><button class="copy-btn">Copiar</button></div>
+        <pre><code>void generarReporteProgramas(){
+    ofstream archivo("programas.txt");
+    for (int p = 0; p &lt; universidad.programasCount; p++){
+        Programa &amp;prog = universidad.programas[p];
+        archivo &lt;&lt; prog.codigo &lt;&lt; "," &lt;&lt; prog.nombre &lt;&lt; "," &lt;&lt; prog.estudiantesCount &lt;&lt; endl;
+    }
+    archivo.close();
+    cout &lt;&lt; "Reporte generado: programas.txt" &lt;&lt; endl;
+}</code></pre>
+      </div>
+      <div class="explain-card" style="margin:0 0 16px;">
+        <p>Mismo recorrido de <code>listarProgramas()</code> (opción 6), cambiando <code>cout</code> por un <code>ofstream archivo</code> y las comas como separador — "Separados por comas" es requisito explícito del enunciado para los 4 reportes.</p>
+      </div>
+
+      <div class="code-wrap">
+        <div class="code-header"><span>11. generarReporteEstudiantes()</span><button class="copy-btn">Copiar</button></div>
+        <pre><code>void generarReporteEstudiantes(){
+    ofstream archivo("estudiantes.txt");
+    for (int p = 0; p &lt; universidad.programasCount; p++){
+        Programa &amp;prog = universidad.programas[p];
+        for (int e = 0; e &lt; prog.estudiantesCount; e++){
+            Estudiante &amp;est = prog.estudiantes[e];
+            archivo &lt;&lt; prog.nombre &lt;&lt; "," &lt;&lt; est.id &lt;&lt; "," &lt;&lt; est.nombre &lt;&lt; ","
+                    &lt;&lt; est.documento &lt;&lt; "," &lt;&lt; est.telefono &lt;&lt; endl;
+        }
+    }
+    archivo.close();
+    cout &lt;&lt; "Reporte generado: estudiantes.txt" &lt;&lt; endl;
+}</code></pre>
+      </div>
+      <div class="explain-card" style="margin:0 0 16px;">
+        <p>A diferencia de la opción 7 (que pedía un código de programa por consola), este reporte es un volcado completo: recorre <em>todos</em> los programas y todos sus estudiantes de una sola vez, sin pedir nada — es un reporte batch, no una consulta interactiva.</p>
+      </div>
+
+      <div class="code-wrap">
+        <div class="code-header"><span>12. generarReporteMatriculas()</span><button class="copy-btn">Copiar</button></div>
+        <pre><code>void generarReporteMatriculas(){
+    ofstream archivo("matriculas.txt");
+    archivo &lt;&lt; fixed &lt;&lt; setprecision(2);
+    for (int p = 0; p &lt; universidad.programasCount; p++){
+        Programa &amp;prog = universidad.programas[p];
+        for (int e = 0; e &lt; prog.estudiantesCount; e++){
+            Estudiante &amp;est = prog.estudiantes[e];
+            for (int m = 0; m &lt; est.matriculasCount; m++){
+                Matricula &amp;mat = est.matriculas[m];
+                archivo &lt;&lt; prog.nombre &lt;&lt; "," &lt;&lt; est.nombre &lt;&lt; "," &lt;&lt; mat.codigoMateria &lt;&lt; ","
+                        &lt;&lt; mat.nombreMateria &lt;&lt; "," &lt;&lt; mat.definitiva &lt;&lt; endl;
+            }
+        }
+    }
+    archivo.close();
+    cout &lt;&lt; "Reporte generado: matriculas.txt" &lt;&lt; endl;
+}</code></pre>
+      </div>
+      <div class="explain-card" style="margin:0 0 16px;">
+        <p>"Similar a la opción 9" — mismos 3 <code>for</code> anidados de <code>mostrarHistorial()</code>, pero en vez de indentar con espacios para mostrar jerarquía visual, cada línea es un registro plano <code>programa,estudiante,materia,nombreMateria,definitiva</code> pensado para abrirse en Excel, no para leerse escalonado. <code>archivo &lt;&lt; fixed &lt;&lt; setprecision(2)</code> se aplica una sola vez, antes del primer <code>for</code> — el <code>ofstream</code> recuerda ese formato para todo lo que se escriba después, así que no hay que repetirlo en cada línea.</p>
+      </div>
+
+      <div class="code-wrap">
+        <div class="code-header"><span>13. generarReportePromedios()</span><button class="copy-btn">Copiar</button></div>
+        <pre><code>void generarReportePromedios(){
+    ofstream archivo("reporte_promedios.txt");
+    archivo &lt;&lt; "Programa,Documento,Estudiante,Promedio" &lt;&lt; endl;
+
+    for (int p = 0; p &lt; universidad.programasCount; p++){
+        Programa &amp;prog = universidad.programas[p];
+        for (int e = 0; e &lt; prog.estudiantesCount; e++){
+            Estudiante &amp;est = prog.estudiantes[e];
+            if (est.matriculasCount == 0) continue;
+
+            float suma = 0;
+            for (int m = 0; m &lt; est.matriculasCount; m++){
+                suma += est.matriculas[m].definitiva;
+            }
+            float promedio = suma / est.matriculasCount;
+
+            archivo &lt;&lt; prog.nombre &lt;&lt; "," &lt;&lt; est.documento &lt;&lt; "," &lt;&lt; est.nombre &lt;&lt; ","
+                    &lt;&lt; fixed &lt;&lt; setprecision(2) &lt;&lt; promedio &lt;&lt; endl;
+        }
+    }
+    archivo.close();
+    cout &lt;&lt; "Reporte generado: reporte_promedios.txt" &lt;&lt; endl;
+}</code></pre>
+      </div>
+      <div class="explain-card" style="margin:0 0 16px;">
+        <p>El encabezado <code>"Programa,Documento,Estudiante,Promedio"</code> se escribe una sola vez, antes de los dos <code>for</code>, calcando exacto el formato del ejemplo del enunciado. <code>fixed &lt;&lt; setprecision(2)</code> (de <code>&lt;iomanip&gt;</code>) fuerza siempre 2 decimales — igual que <code>4.58</code> en el ejemplo, no <code>4.5833333</code>. <code>if (matriculasCount == 0) continue</code> salta estudiantes sin materias, para no meter un promedio de <code>0/0</code> al reporte.</p>
+      </div>
+
+      <div class="sust-card">
+        <h4>🎤 Preguntas típicas de sustentación</h4>
+        <div class="qa">
+          <div class="q">¿Por qué estos 4 reportes no piden ningún dato por consola?</div>
+          <div class="a">Porque son reportes completos de toda la universidad, no consultas de un solo registro — recorren directamente la estructura en memoria (poblada por <code>cargarUniversidad</code> al inicio, o por lo registrado en la sesión) y vuelcan todo a archivo.</div>
+        </div>
+        <div class="qa">
+          <div class="q">¿Para qué sirve setprecision(2) y qué pasa si no lo pones?</div>
+          <div class="a">Sin <code>setprecision</code>, <code>cout</code>/<code>ofstream</code> imprime un <code>float</code> con su representación por defecto (hasta 6 dígitos significativos, con decimales que pueden variar) — <code>fixed &lt;&lt; setprecision(2)</code> fija siempre 2 decimales exactos, que es lo que pide el formato del ejemplo (4.58, no 4.58333).</div>
+        </div>
+      </div>
+
+      <div class="new-func">
+        <h4>🔧 Si te piden un reporte nuevo</h4>
+        <p><strong>El esqueleto base:</strong> <code>ofstream archivo("nombre.txt")</code>, recorrer los niveles que necesites con <code>for</code> anidados, escribir cada línea con <code>&lt;&lt;</code> separado por comas, <code>archivo.close()</code> al final.</p>
+        <p style="margin-top:8px;"><strong>Reporte solo de un programa (pide código):</strong> se le agrega un <code>cin &gt;&gt; codigo</code> y un <code>buscarPrograma(codigo)</code> al principio, como en <code>listarEstudiantesPorProgramaMenu</code> — y el recorrido ya no necesita el <code>for</code> más externo (el de programas), porque ya tienes el puntero al único programa que te interesa.</p>
+        <p style="margin-top:8px;"><strong>Reporte con encabezado de columnas (como reporte_promedios.txt):</strong> una sola línea <code>archivo &lt;&lt; "Col1,Col2,Col3" &lt;&lt; endl;</code> escrita <em>antes</em> del primer <code>for</code>, nunca dentro del ciclo — si queda dentro, el encabezado se repite en cada vuelta.</p>
+        <p style="margin-top:8px;"><strong>¿Por qué todos abren el archivo con ofstream y no con fstream?</strong> Porque solo se escribe, nunca se necesita leer de vuelta en la misma función — <code>ofstream</code> es la versión de <code>fstream</code> ya restringida solo a escritura, mismo principio que usar <code>ifstream</code> en <code>cargarUniversidad</code> porque ahí solo se lee.</p>
+      </div>
+    </div>
+
+    <!-- ═══════════ CÓDIGO COMPLETO ═══════════ -->
+    <div class="panel" id="panel-full">
+      <div class="panel-header">
+        <h2>Código completo</h2>
+        <p>Proyecto Final completo: Bloques 1 a 6.</p>
+      </div>
+
+      <div class="code-wrap">
+        <div class="code-header"><span>proyecto_final.cpp</span><button class="copy-btn">Copiar</button></div>
+        <pre><code>/* Integrantes Maria Fernanda Castañeda, Santiago Gaitan / Grupo: 10 / Fecha: 2026/09/21 / Proyecto Final */
+#include &lt;iostream&gt;
+#include &lt;cstring&gt;
+#include &lt;cstdlib&gt;
+#include &lt;cstdio&gt;
+#include &lt;fstream&gt;
+#include &lt;iomanip&gt;
+using namespace std;
+
+struct Fecha{
+    char anio[5];
+    char mes[3];
+    char dia[3];
+};
+
+struct Matricula{
+    int id;
+    char codigoMateria[10];
+    char nombreMateria[40];
+    float notas[3];
+    float definitiva;
+    Fecha fecha;
+};
+
+struct Estudiante{
+    int id;
+    char nombre[50];
+    char documento[20];
+    char telefono[20];
+    Matricula *matriculas;
+    int matriculasCount;
+};
+
+struct Programa{
+    int codigo;
+    char nombre[50];
+    Estudiante *estudiantes;
+    int estudiantesCount;
+};
+
+struct Universidad{
+    Programa *programas;
+    int programasCount;
+};
+
+struct ProgramaDisco{
+    int codigo;
+    char nombre[50];
+};
+
+struct EstudianteDisco{
+    int idPrograma;
+    int id;
+    char nombre[50];
+    char documento[20];
+    char telefono[20];
+};
+
+struct MatriculaDisco{
+    int idEstudiante;
+    int id;
+    char codigoMateria[10];
+    char nombreMateria[40];
+    float notas[3];
+    float definitiva;
+    Fecha fecha;
+};
+
+Universidad universidad = { nullptr, 0 };
+
+Programa* buscarPrograma(int codigo){
+    for (int i = 0; i &lt; universidad.programasCount; i++){
+        if (universidad.programas[i].codigo == codigo)
+            return &amp;universidad.programas[i];
+    }
+    return nullptr;
+}
+
+Estudiante* buscarEstudiantePorDocumento(const char documento[]){
+    for (int p = 0; p &lt; universidad.programasCount; p++){
+        Programa &amp;prog = universidad.programas[p];
+        for (int e = 0; e &lt; prog.estudiantesCount; e++){
+            if (strcmp(prog.estudiantes[e].documento, documento) == 0)
+                return &amp;prog.estudiantes[e];
+        }
+    }
+    return nullptr;
+}
+
+Estudiante* buscarEstudiantePorId(int id){
+    for (int p = 0; p &lt; universidad.programasCount; p++){
+        Programa &amp;prog = universidad.programas[p];
+        for (int e = 0; e &lt; prog.estudiantesCount; e++){
+            if (prog.estudiantes[e].id == id)
+                return &amp;prog.estudiantes[e];
+        }
+    }
+    return nullptr;
+}
+
+int generarIdEstudiante(){
+    int id;
+    bool repetido;
+    do{
+        id = rand() % 90000 + 10000;
+        repetido = false;
+        for (int p = 0; p &lt; universidad.programasCount &amp;&amp; !repetido; p++){
+            for (int e = 0; e &lt; universidad.programas[p].estudiantesCount; e++){
+                if (universidad.programas[p].estudiantes[e].id == id){
+                    repetido = true;
+                    break;
+                }
+            }
+        }
+    } while (repetido);
+    return id;
+}
+
+int generarIdMatricula(){
+    int id;
+    bool repetido;
+    do{
+        id = rand() % 90000 + 10000;
+        repetido = false;
+        for (int p = 0; p &lt; universidad.programasCount &amp;&amp; !repetido; p++){
+            for (int e = 0; e &lt; universidad.programas[p].estudiantesCount &amp;&amp; !repetido; e++){
+                Estudiante &amp;est = universidad.programas[p].estudiantes[e];
+                for (int m = 0; m &lt; est.matriculasCount; m++){
+                    if (est.matriculas[m].id == id){
+                        repetido = true;
+                        break;
+                    }
+                }
+            }
+        }
+    } while (repetido);
+    return id;
+}
+
+void agregarPrograma(int codigo, const char nombre[]){
+    if (buscarPrograma(codigo) != nullptr){
+        cout &lt;&lt; "El programa con codigo " &lt;&lt; codigo &lt;&lt; " ya existe." &lt;&lt; endl;
+        return;
+    }
+
+    Programa *nuevoArreglo = new Programa[universidad.programasCount + 1];
+    for (int i = 0; i &lt; universidad.programasCount; i++){
+        nuevoArreglo[i] = universidad.programas[i];
+    }
+
+    nuevoArreglo[universidad.programasCount].codigo = codigo;
+    strcpy(nuevoArreglo[universidad.programasCount].nombre, nombre);
+    nuevoArreglo[universidad.programasCount].estudiantes = nullptr;
+    nuevoArreglo[universidad.programasCount].estudiantesCount = 0;
+
+    delete[] universidad.programas;
+    universidad.programas = nuevoArreglo;
+    universidad.programasCount++;
+
+    cout &lt;&lt; "Programa creado correctamente. Codigo: " &lt;&lt; codigo &lt;&lt; endl;
+}
+
+void insertarEstudiante(Programa *programa, int id, const char nombre[], const char documento[], const char telefono[]){
+    Estudiante *nuevoArreglo = new Estudiante[programa-&gt;estudiantesCount + 1];
+    for (int i = 0; i &lt; programa-&gt;estudiantesCount; i++){
+        nuevoArreglo[i] = programa-&gt;estudiantes[i];
+    }
+
+    nuevoArreglo[programa-&gt;estudiantesCount].id = id;
+    strcpy(nuevoArreglo[programa-&gt;estudiantesCount].nombre, nombre);
+    strcpy(nuevoArreglo[programa-&gt;estudiantesCount].documento, documento);
+    strcpy(nuevoArreglo[programa-&gt;estudiantesCount].telefono, telefono);
+    nuevoArreglo[programa-&gt;estudiantesCount].matriculas = nullptr;
+    nuevoArreglo[programa-&gt;estudiantesCount].matriculasCount = 0;
+
+    delete[] programa-&gt;estudiantes;
+    programa-&gt;estudiantes = nuevoArreglo;
+    programa-&gt;estudiantesCount++;
+}
+
+void agregarEstudiante(int codigoPrograma, const char nombre[], const char documento[], const char telefono[]){
+    Programa *programa = buscarPrograma(codigoPrograma);
+    if (programa == nullptr){
+        cout &lt;&lt; "No existe un programa con codigo " &lt;&lt; codigoPrograma &lt;&lt; endl;
+        return;
+    }
+    if (buscarEstudiantePorDocumento(documento) != nullptr){
+        cout &lt;&lt; "Ya existe un estudiante con el documento " &lt;&lt; documento &lt;&lt; endl;
+        return;
+    }
+
+    int nuevoId = generarIdEstudiante();
+    insertarEstudiante(programa, nuevoId, nombre, documento, telefono);
+
+    cout &lt;&lt; "Estudiante creado correctamente. ID asignado: " &lt;&lt; nuevoId &lt;&lt; endl;
+}
+
+void insertarMatricula(Estudiante *estudiante, int id, const char codigoMateria[], const char nombreMateria[], Fecha fecha, float notas[3], float definitiva){
+    Matricula *nuevoArreglo = new Matricula[estudiante-&gt;matriculasCount + 1];
+    for (int i = 0; i &lt; estudiante-&gt;matriculasCount; i++){
+        nuevoArreglo[i] = estudiante-&gt;matriculas[i];
+    }
+
+    nuevoArreglo[estudiante-&gt;matriculasCount].id = id;
+    strcpy(nuevoArreglo[estudiante-&gt;matriculasCount].codigoMateria, codigoMateria);
+    strcpy(nuevoArreglo[estudiante-&gt;matriculasCount].nombreMateria, nombreMateria);
+    for (int n = 0; n &lt; 3; n++) nuevoArreglo[estudiante-&gt;matriculasCount].notas[n] = notas[n];
+    nuevoArreglo[estudiante-&gt;matriculasCount].definitiva = definitiva;
+    nuevoArreglo[estudiante-&gt;matriculasCount].fecha = fecha;
+
+    delete[] estudiante-&gt;matriculas;
+    estudiante-&gt;matriculas = nuevoArreglo;
+    estudiante-&gt;matriculasCount++;
+}
+
+void agregarMatricula(const char documentoEstudiante[], const char codigoMateria[], const char nombreMateria[], Fecha fecha, float notas[3]){
+    Estudiante *estudiante = buscarEstudiantePorDocumento(documentoEstudiante);
+    if (estudiante == nullptr){
+        cout &lt;&lt; "No existe un estudiante con el documento " &lt;&lt; documentoEstudiante &lt;&lt; endl;
+        return;
+    }
+
+    for (int m = 0; m &lt; estudiante-&gt;matriculasCount; m++){
+        if (strcmp(estudiante-&gt;matriculas[m].codigoMateria, codigoMateria) == 0){
+            cout &lt;&lt; "La materia " &lt;&lt; codigoMateria &lt;&lt; " ya esta matriculada para este estudiante." &lt;&lt; endl;
+            return;
+        }
+    }
+
+    for (int n = 0; n &lt; 3; n++){
+        if (notas[n] &lt; 0.0f || notas[n] &gt; 5.0f){
+            cout &lt;&lt; "Nota invalida: " &lt;&lt; notas[n] &lt;&lt; ". Debe estar entre 0.0 y 5.0." &lt;&lt; endl;
+            return;
+        }
+    }
+
+    int nuevoId = generarIdMatricula();
+    float definitiva = (notas[0] + notas[1] + notas[2]) / 3.0f;
+
+    insertarMatricula(estudiante, nuevoId, codigoMateria, nombreMateria, fecha, notas, definitiva);
+
+    cout &lt;&lt; "Matricula registrada correctamente. ID asignado: " &lt;&lt; nuevoId &lt;&lt; endl;
+}
+
+void cargaMasivaEstudiantes(){
+    ifstream archivo("estudiantes.csv");
+    if (!archivo.is_open()){
+        cout &lt;&lt; "No se pudo abrir el archivo estudiantes.csv" &lt;&lt; endl;
+        return;
+    }
+
+    char linea[200];
+    int importados = 0;
+
+    while (archivo.getline(linea, 200)){
+        if (strlen(linea) == 0) continue;
+
+        char *token = strtok(linea, ",");
+        int codigoPrograma = atoi(token);
+        token = strtok(nullptr, ",");
+        char nombrePrograma[50];
+        strcpy(nombrePrograma, token);
+        token = strtok(nullptr, ",");
+        int idEstudiante = atoi(token);
+        token = strtok(nullptr, ",");
+        char nombre[50];
+        strcpy(nombre, token);
+        token = strtok(nullptr, ",");
+        char documento[20];
+        strcpy(documento, token);
+        token = strtok(nullptr, ",");
+        char telefono[20];
+        strcpy(telefono, token);
+
+        Programa *programa = buscarPrograma(codigoPrograma);
+        if (programa == nullptr){
+            agregarPrograma(codigoPrograma, nombrePrograma);
+            programa = buscarPrograma(codigoPrograma);
+        }
+
+        if (buscarEstudiantePorDocumento(documento) != nullptr){
+            cout &lt;&lt; "Documento " &lt;&lt; documento &lt;&lt; " ya existe, se omite." &lt;&lt; endl;
+            continue;
+        }
+
+        insertarEstudiante(programa, idEstudiante, nombre, documento, telefono);
+        importados++;
+    }
+
+    archivo.close();
+    cout &lt;&lt; "Carga masiva completada. Estudiantes importados: " &lt;&lt; importados &lt;&lt; endl;
+}
+
+void cargarUniversidad(){
+    ifstream archivoProgramas("programas.dat", ios::binary);
+    if (archivoProgramas.is_open()){
+        ProgramaDisco pd;
+        while (archivoProgramas.read((char*)&amp;pd, sizeof(pd))){
+            agregarPrograma(pd.codigo, pd.nombre);
+        }
+        archivoProgramas.close();
+    }
+
+    ifstream archivoEstudiantes("estudiantes.dat", ios::binary);
+    if (archivoEstudiantes.is_open()){
+        EstudianteDisco ed;
+        while (archivoEstudiantes.read((char*)&amp;ed, sizeof(ed))){
+            Programa *programa = buscarPrograma(ed.idPrograma);
+            if (programa != nullptr){
+                insertarEstudiante(programa, ed.id, ed.nombre, ed.documento, ed.telefono);
+            }
+        }
+        archivoEstudiantes.close();
+    }
+
+    ifstream archivoMatriculas("matriculas.dat", ios::binary);
+    if (archivoMatriculas.is_open()){
+        MatriculaDisco md;
+        while (archivoMatriculas.read((char*)&amp;md, sizeof(md))){
+            Estudiante *estudiante = buscarEstudiantePorId(md.idEstudiante);
+            if (estudiante != nullptr){
+                insertarMatricula(estudiante, md.id, md.codigoMateria, md.nombreMateria, md.fecha, md.notas, md.definitiva);
+            }
+        }
+        archivoMatriculas.close();
+    }
+}
+
+void guardarUniversidad(){
+    remove("programas.dat");
+    remove("estudiantes.dat");
+    remove("matriculas.dat");
+
+    ofstream archivoProgramas("programas.dat", ios::binary);
+    ofstream archivoEstudiantes("estudiantes.dat", ios::binary);
+    ofstream archivoMatriculas("matriculas.dat", ios::binary);
+
+    for (int p = 0; p &lt; universidad.programasCount; p++){
+        Programa &amp;prog = universidad.programas[p];
+
+        ProgramaDisco pd;
+        pd.codigo = prog.codigo;
+        strcpy(pd.nombre, prog.nombre);
+        archivoProgramas.write((char*)&amp;pd, sizeof(pd));
+
+        for (int e = 0; e &lt; prog.estudiantesCount; e++){
+            Estudiante &amp;est = prog.estudiantes[e];
+
+            EstudianteDisco ed;
+            ed.idPrograma = prog.codigo;
+            ed.id = est.id;
+            strcpy(ed.nombre, est.nombre);
+            strcpy(ed.documento, est.documento);
+            strcpy(ed.telefono, est.telefono);
+            archivoEstudiantes.write((char*)&amp;ed, sizeof(ed));
+
+            for (int m = 0; m &lt; est.matriculasCount; m++){
+                Matricula &amp;mat = est.matriculas[m];
+
+                MatriculaDisco md;
+                md.idEstudiante = est.id;
+                md.id = mat.id;
+                strcpy(md.codigoMateria, mat.codigoMateria);
+                strcpy(md.nombreMateria, mat.nombreMateria);
+                for (int n = 0; n &lt; 3; n++) md.notas[n] = mat.notas[n];
+                md.definitiva = mat.definitiva;
+                md.fecha = mat.fecha;
+                archivoMatriculas.write((char*)&amp;md, sizeof(md));
+            }
+        }
+    }
+
+    archivoProgramas.close();
+    archivoEstudiantes.close();
+    archivoMatriculas.close();
+    cout &lt;&lt; "Informacion guardada correctamente." &lt;&lt; endl;
+}
+
+void liberarMemoria(){
+    for (int p = 0; p &lt; universidad.programasCount; p++){
+        Programa &amp;prog = universidad.programas[p];
+        for (int e = 0; e &lt; prog.estudiantesCount; e++){
+            delete[] prog.estudiantes[e].matriculas;
+        }
+        delete[] prog.estudiantes;
+    }
+    delete[] universidad.programas;
+    universidad.programas = nullptr;
+    universidad.programasCount = 0;
+}
+
+void listarProgramas(){
+    cout &lt;&lt; "\n===== Listado de programas =====" &lt;&lt; endl;
+    if (universidad.programasCount == 0){
+        cout &lt;&lt; "No hay programas registrados." &lt;&lt; endl;
+        return;
+    }
+    for (int p = 0; p &lt; universidad.programasCount; p++){
+        Programa &amp;prog = universidad.programas[p];
+        cout &lt;&lt; "Codigo: " &lt;&lt; prog.codigo &lt;&lt; " - Nombre: " &lt;&lt; prog.nombre
+             &lt;&lt; " - Estudiantes matriculados: " &lt;&lt; prog.estudiantesCount &lt;&lt; endl;
+    }
+}
+
+void listarEstudiantesPorProgramaMenu(){
+    int codigo;
+    cout &lt;&lt; "Codigo del programa: ";
+    cin &gt;&gt; codigo;
+    cin.ignore();
+
+    Programa *programa = buscarPrograma(codigo);
+    if (programa == nullptr){
+        cout &lt;&lt; "No existe un programa con codigo " &lt;&lt; codigo &lt;&lt; endl;
+        return;
+    }
+
+    cout &lt;&lt; "\n===== Programa: " &lt;&lt; programa-&gt;nombre &lt;&lt; " (Codigo " &lt;&lt; programa-&gt;codigo &lt;&lt; ") =====" &lt;&lt; endl;
+    cout &lt;&lt; "Cantidad de estudiantes: " &lt;&lt; programa-&gt;estudiantesCount &lt;&lt; endl;
+    for (int e = 0; e &lt; programa-&gt;estudiantesCount; e++){
+        Estudiante &amp;est = programa-&gt;estudiantes[e];
+        cout &lt;&lt; "  ID: " &lt;&lt; est.id &lt;&lt; " - Nombre: " &lt;&lt; est.nombre
+             &lt;&lt; " - Documento: " &lt;&lt; est.documento &lt;&lt; " - Telefono: " &lt;&lt; est.telefono &lt;&lt; endl;
+    }
+}
+
+void buscarEstudianteMenu(){
+    char documento[20];
+    cout &lt;&lt; "Documento del estudiante: ";
+    cin.getline(documento, 20);
+
+    for (int p = 0; p &lt; universidad.programasCount; p++){
+        Programa &amp;prog = universidad.programas[p];
+        for (int e = 0; e &lt; prog.estudiantesCount; e++){
+            Estudiante &amp;est = prog.estudiantes[e];
+            if (strcmp(est.documento, documento) == 0){
+                cout &lt;&lt; "\n===== Estudiante encontrado =====" &lt;&lt; endl;
+                cout &lt;&lt; "ID: " &lt;&lt; est.id &lt;&lt; endl;
+                cout &lt;&lt; "Nombre: " &lt;&lt; est.nombre &lt;&lt; endl;
+                cout &lt;&lt; "Documento: " &lt;&lt; est.documento &lt;&lt; endl;
+                cout &lt;&lt; "Telefono: " &lt;&lt; est.telefono &lt;&lt; endl;
+                cout &lt;&lt; "Programa: " &lt;&lt; prog.nombre &lt;&lt; " (Codigo " &lt;&lt; prog.codigo &lt;&lt; ")" &lt;&lt; endl;
+
+                cout &lt;&lt; "Materias matriculadas:" &lt;&lt; endl;
+                float sumaDefinitivas = 0;
+                for (int m = 0; m &lt; est.matriculasCount; m++){
+                    Matricula &amp;mat = est.matriculas[m];
+                    cout &lt;&lt; "  " &lt;&lt; mat.codigoMateria &lt;&lt; " - " &lt;&lt; mat.nombreMateria
+                         &lt;&lt; " - Definitiva: " &lt;&lt; mat.definitiva &lt;&lt; endl;
+                    sumaDefinitivas += mat.definitiva;
+                }
+
+                if (est.matriculasCount &gt; 0){
+                    cout &lt;&lt; "Promedio general: " &lt;&lt; fixed &lt;&lt; setprecision(2)
+                         &lt;&lt; (sumaDefinitivas / est.matriculasCount) &lt;&lt; endl;
+                } else {
+                    cout &lt;&lt; "El estudiante aun no tiene materias matriculadas." &lt;&lt; endl;
+                }
+                return;
+            }
+        }
+    }
+    cout &lt;&lt; "No se encontro un estudiante con el documento " &lt;&lt; documento &lt;&lt; endl;
+}
+
+void mostrarHistorial(){
+    cout &lt;&lt; "\n===== Historial academico =====" &lt;&lt; endl;
+    for (int p = 0; p &lt; universidad.programasCount; p++){
+        Programa &amp;prog = universidad.programas[p];
+        cout &lt;&lt; "Programa: " &lt;&lt; prog.nombre &lt;&lt; " (Codigo " &lt;&lt; prog.codigo &lt;&lt; ")" &lt;&lt; endl;
+
+        for (int e = 0; e &lt; prog.estudiantesCount; e++){
+            Estudiante &amp;est = prog.estudiantes[e];
+            cout &lt;&lt; "  Estudiante: " &lt;&lt; est.nombre &lt;&lt; " (Documento " &lt;&lt; est.documento &lt;&lt; ")" &lt;&lt; endl;
+
+            for (int m = 0; m &lt; est.matriculasCount; m++){
+                Matricula &amp;mat = est.matriculas[m];
+                cout &lt;&lt; "    Matricula: " &lt;&lt; mat.codigoMateria &lt;&lt; " - " &lt;&lt; mat.nombreMateria
+                     &lt;&lt; " - Definitiva: " &lt;&lt; mat.definitiva &lt;&lt; endl;
+            }
+        }
+    }
+}
+
+void generarReporteProgramas(){
+    ofstream archivo("programas.txt");
+    for (int p = 0; p &lt; universidad.programasCount; p++){
+        Programa &amp;prog = universidad.programas[p];
+        archivo &lt;&lt; prog.codigo &lt;&lt; "," &lt;&lt; prog.nombre &lt;&lt; "," &lt;&lt; prog.estudiantesCount &lt;&lt; endl;
+    }
+    archivo.close();
+    cout &lt;&lt; "Reporte generado: programas.txt" &lt;&lt; endl;
+}
+
+void generarReporteEstudiantes(){
+    ofstream archivo("estudiantes.txt");
+    for (int p = 0; p &lt; universidad.programasCount; p++){
+        Programa &amp;prog = universidad.programas[p];
+        for (int e = 0; e &lt; prog.estudiantesCount; e++){
+            Estudiante &amp;est = prog.estudiantes[e];
+            archivo &lt;&lt; prog.nombre &lt;&lt; "," &lt;&lt; est.id &lt;&lt; "," &lt;&lt; est.nombre &lt;&lt; ","
+                    &lt;&lt; est.documento &lt;&lt; "," &lt;&lt; est.telefono &lt;&lt; endl;
+        }
+    }
+    archivo.close();
+    cout &lt;&lt; "Reporte generado: estudiantes.txt" &lt;&lt; endl;
+}
+
+void generarReporteMatriculas(){
+    ofstream archivo("matriculas.txt");
+    archivo &lt;&lt; fixed &lt;&lt; setprecision(2);
+    for (int p = 0; p &lt; universidad.programasCount; p++){
+        Programa &amp;prog = universidad.programas[p];
+        for (int e = 0; e &lt; prog.estudiantesCount; e++){
+            Estudiante &amp;est = prog.estudiantes[e];
+            for (int m = 0; m &lt; est.matriculasCount; m++){
+                Matricula &amp;mat = est.matriculas[m];
+                archivo &lt;&lt; prog.nombre &lt;&lt; "," &lt;&lt; est.nombre &lt;&lt; "," &lt;&lt; mat.codigoMateria &lt;&lt; ","
+                        &lt;&lt; mat.nombreMateria &lt;&lt; "," &lt;&lt; mat.definitiva &lt;&lt; endl;
+            }
+        }
+    }
+    archivo.close();
+    cout &lt;&lt; "Reporte generado: matriculas.txt" &lt;&lt; endl;
+}
+
+void generarReportePromedios(){
+    ofstream archivo("reporte_promedios.txt");
+    archivo &lt;&lt; "Programa,Documento,Estudiante,Promedio" &lt;&lt; endl;
+
+    for (int p = 0; p &lt; universidad.programasCount; p++){
+        Programa &amp;prog = universidad.programas[p];
+        for (int e = 0; e &lt; prog.estudiantesCount; e++){
+            Estudiante &amp;est = prog.estudiantes[e];
+            if (est.matriculasCount == 0) continue;
+
+            float suma = 0;
+            for (int m = 0; m &lt; est.matriculasCount; m++){
+                suma += est.matriculas[m].definitiva;
+            }
+            float promedio = suma / est.matriculasCount;
+
+            archivo &lt;&lt; prog.nombre &lt;&lt; "," &lt;&lt; est.documento &lt;&lt; "," &lt;&lt; est.nombre &lt;&lt; ","
+                    &lt;&lt; fixed &lt;&lt; setprecision(2) &lt;&lt; promedio &lt;&lt; endl;
+        }
+    }
+    archivo.close();
+    cout &lt;&lt; "Reporte generado: reporte_promedios.txt" &lt;&lt; endl;
+}
+
+void registrarProgramaMenu(){
+    int codigo;
+    char nombre[50];
+
+    cout &lt;&lt; "Codigo del programa: ";
+    cin &gt;&gt; codigo;
+    cin.ignore();
+    cout &lt;&lt; "Nombre del programa: ";
+    cin.getline(nombre, 50);
+
+    agregarPrograma(codigo, nombre);
+}
+
+void registrarEstudianteMenu(){
+    int codigoPrograma;
+    char nombre[50], documento[20], telefono[20];
+
+    cout &lt;&lt; "Codigo del programa: ";
+    cin &gt;&gt; codigoPrograma;
+    cin.ignore();
+    cout &lt;&lt; "Nombre: ";
+    cin.getline(nombre, 50);
+    cout &lt;&lt; "Documento: ";
+    cin.getline(documento, 20);
+    cout &lt;&lt; "Telefono: ";
+    cin.getline(telefono, 20);
+
+    agregarEstudiante(codigoPrograma, nombre, documento, telefono);
+}
+
+void registrarMatriculaMenu(){
+    char documento[20];
+    char codigoMateria[10], nombreMateria[40];
+    Fecha fecha;
+    float notas[3];
+
+    cout &lt;&lt; "Documento del estudiante: ";
+    cin.getline(documento, 20);
+
+    cout &lt;&lt; "Codigo de la materia: ";
+    cin &gt;&gt; codigoMateria;
+    cin.ignore();
+    cout &lt;&lt; "Nombre de la materia: ";
+    cin.getline(nombreMateria, 40);
+
+    cout &lt;&lt; "Fecha - Anio (aaaa): ";
+    cin &gt;&gt; fecha.anio;
+    cout &lt;&lt; "Fecha - Mes (mm): ";
+    cin &gt;&gt; fecha.mes;
+    cout &lt;&lt; "Fecha - Dia (dd): ";
+    cin &gt;&gt; fecha.dia;
+
+    for (int i = 0; i &lt; 3; i++){
+        cout &lt;&lt; "Nota " &lt;&lt; (i + 1) &lt;&lt; " (0.0 a 5.0): ";
+        cin &gt;&gt; notas[i];
+    }
+    cin.ignore();
+
+    agregarMatricula(documento, codigoMateria, nombreMateria, fecha, notas);
+}
+
+void mostrarMenu(){
+    cout &lt;&lt; "\n======================================" &lt;&lt; endl;
+    cout &lt;&lt; " 1. Registrar programa" &lt;&lt; endl;
+    cout &lt;&lt; " 2. Registrar estudiante" &lt;&lt; endl;
+    cout &lt;&lt; " 3. Registrar matricula" &lt;&lt; endl;
+    cout &lt;&lt; " 5. Carga masiva de estudiantes" &lt;&lt; endl;
+    cout &lt;&lt; " 6. Listar programas" &lt;&lt; endl;
+    cout &lt;&lt; " 7. Listar estudiantes por programa" &lt;&lt; endl;
+    cout &lt;&lt; " 8. Buscar estudiante por documento" &lt;&lt; endl;
+    cout &lt;&lt; " 9. Mostrar historial academico" &lt;&lt; endl;
+    cout &lt;&lt; "10. Generar reporte de programas" &lt;&lt; endl;
+    cout &lt;&lt; "11. Generar reporte de estudiantes" &lt;&lt; endl;
+    cout &lt;&lt; "12. Generar reporte de matriculas" &lt;&lt; endl;
+    cout &lt;&lt; "13. Reporte de promedios" &lt;&lt; endl;
+    cout &lt;&lt; "14. Salir" &lt;&lt; endl;
+    cout &lt;&lt; "======================================" &lt;&lt; endl;
+    cout &lt;&lt; "Digite opcion: ";
+}
+
+int main(){
+    cargarUniversidad();
+    cout &lt;&lt; fixed &lt;&lt; setprecision(2);
+
+    int opcion;
+    do{
+        mostrarMenu();
+        cin &gt;&gt; opcion;
+        cin.ignore();
+
+        switch (opcion){
+            case 1: registrarProgramaMenu(); break;
+            case 2: registrarEstudianteMenu(); break;
+            case 3: registrarMatriculaMenu(); break;
+            case 5: cargaMasivaEstudiantes(); break;
+            case 6: listarProgramas(); break;
+            case 7: listarEstudiantesPorProgramaMenu(); break;
+            case 8: buscarEstudianteMenu(); break;
+            case 9: mostrarHistorial(); break;
+            case 10: generarReporteProgramas(); break;
+            case 11: generarReporteEstudiantes(); break;
+            case 12: generarReporteMatriculas(); break;
+            case 13: generarReportePromedios(); break;
+            case 14:
+                guardarUniversidad();
+                liberarMemoria();
+                cout &lt;&lt; "Hasta luego." &lt;&lt; endl;
+                break;
+            default:
+                cout &lt;&lt; "Opcion invalida." &lt;&lt; endl;
+        }
+    } while (opcion != 14);
+
+    return 0;
+}</code></pre>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // ── Navegación entre paneles ──────────────────────────
+  function irAPanel(id){
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    const nav = document.querySelector('.nav-item[data-panel="'+id+'"]');
+    if (nav) nav.classList.add('active');
+    const panel = document.getElementById('panel-'+id);
+    if (panel) panel.classList.add('active');
+    window.scrollTo(0,0);
+  }
+  document.querySelectorAll('.nav-item, .ov-card').forEach(el=>{
+    el.addEventListener('click', ()=> irAPanel(el.dataset.panel));
+  });
+
+  // ── Copiar código ──────────────────────────────────────
+  document.querySelectorAll('.copy-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const pre = btn.closest('.code-wrap').querySelector('pre code');
+      const texto = pre.textContent;
+      navigator.clipboard.writeText(texto).then(()=>{
+        btn.textContent = 'Copiado';
+        btn.classList.add('copied');
+        setTimeout(()=>{ btn.textContent='Copiar'; btn.classList.remove('copied'); }, 1500);
+      });
+    });
+  });
+
+  // ── Syntax highlighting (regex simple, paleta neutra) ──
+  const KEYWORDS = new Set(['if','else','for','while','do','return','break','continue','switch','case','default','struct','typedef','void','const','static','new','delete','nullptr','true','false','using','namespace']);
+  const TYPES = new Set(['int','char','float','double','bool','long','short','unsigned','signed','string','auto']);
+
+  function escapeHtml(s){
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function highlightCpp(code){
+    const regex = /(\/\/.*$)|(#\w+)|("(?:[^"\\]|\\.)*")|('(?:[^'\\]|\\.)*')|(\b\d+\.?\d*f?\b)|([A-Za-z_]\w*)/gm;
+    let result = '', lastIndex = 0, m;
+    while ((m = regex.exec(code)) !== null){
+      result += escapeHtml(code.slice(lastIndex, m.index));
+      lastIndex = regex.lastIndex;
+      if (m[1]) result += '<span class="cm">'+escapeHtml(m[1])+'</span>';
+      else if (m[2]) result += '<span class="pp">'+escapeHtml(m[2])+'</span>';
+      else if (m[3] || m[4]) result += '<span class="st">'+escapeHtml(m[3]||m[4])+'</span>';
+      else if (m[5]) result += '<span class="nm">'+escapeHtml(m[5])+'</span>';
+      else if (m[6]){
+        const word = m[6];
+        const nextChar = code[regex.lastIndex];
+        if (KEYWORDS.has(word)) result += '<span class="kw">'+escapeHtml(word)+'</span>';
+        else if (TYPES.has(word)) result += '<span class="ty">'+escapeHtml(word)+'</span>';
+        else if (nextChar === '(') result += '<span class="fn">'+escapeHtml(word)+'</span>';
+        else result += escapeHtml(word);
+      }
+    }
+    result += escapeHtml(code.slice(lastIndex));
+    return result;
+  }
+
+  document.querySelectorAll('.code-wrap pre code').forEach(el=>{
+    const raw = el.textContent;
+    el.innerHTML = highlightCpp(raw);
+  });
+</script>
+
+</body>
+</html>
