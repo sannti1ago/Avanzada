@@ -1,0 +1,664 @@
+/* Integrantes Maria Fernanda Castañeda, Santiago Gaitan / Grupo: 10 / Fecha: 2026/09/21 / Proyecto Final */
+#include <iostream>
+#include <cstring>
+#include <cstdlib>
+#include <cstdio>
+#include <fstream>
+#include <iomanip>
+using namespace std;
+
+struct Fecha{
+    char anio[5];
+    char mes[3];
+    char dia[3];
+};
+
+struct Matricula{
+    int id;
+    char codigoMateria[10];
+    char nombreMateria[40];
+    float notas[3];
+    float definitiva;
+    Fecha fecha;
+};
+
+struct Estudiante{
+    int id;
+    char nombre[50];
+    char documento[20];
+    char telefono[20];
+    Matricula *matriculas;
+    int matriculasCount;
+};
+
+struct Programa{
+    int codigo;
+    char nombre[50];
+    Estudiante *estudiantes;
+    int estudiantesCount;
+};
+
+struct Universidad{
+    Programa *programas;
+    int programasCount;
+};
+
+struct ProgramaDisco{
+    int codigo;
+    char nombre[50];
+};
+
+struct EstudianteDisco{
+    int idPrograma;
+    int id;
+    char nombre[50];
+    char documento[20];
+    char telefono[20];
+};
+
+struct MatriculaDisco{
+    int idEstudiante;
+    int id;
+    char codigoMateria[10];
+    char nombreMateria[40];
+    float notas[3];
+    float definitiva;
+    Fecha fecha;
+};
+
+Universidad universidad = { nullptr, 0 };
+
+Programa* buscarPrograma(int codigo){
+    for (int i = 0; i < universidad.programasCount; i++){
+        if (universidad.programas[i].codigo == codigo)
+            return &universidad.programas[i];
+    }
+    return nullptr;
+}
+
+Estudiante* buscarEstudiantePorDocumento(const char documento[]){
+    for (int p = 0; p < universidad.programasCount; p++){
+        Programa &prog = universidad.programas[p];
+        for (int e = 0; e < prog.estudiantesCount; e++){
+            if (strcmp(prog.estudiantes[e].documento, documento) == 0)
+                return &prog.estudiantes[e];
+        }
+    }
+    return nullptr;
+}
+
+Estudiante* buscarEstudiantePorId(int id){
+    for (int p = 0; p < universidad.programasCount; p++){
+        Programa &prog = universidad.programas[p];
+        for (int e = 0; e < prog.estudiantesCount; e++){
+            if (prog.estudiantes[e].id == id)
+                return &prog.estudiantes[e];
+        }
+    }
+    return nullptr;
+}
+
+int generarIdEstudiante(){
+    int id;
+    bool repetido;
+    do{
+        id = rand() % 90000 + 10000;
+        repetido = false;
+        for (int p = 0; p < universidad.programasCount && !repetido; p++){
+            for (int e = 0; e < universidad.programas[p].estudiantesCount; e++){
+                if (universidad.programas[p].estudiantes[e].id == id){
+                    repetido = true;
+                    break;
+                }
+            }
+        }
+    } while (repetido);
+    return id;
+}
+
+int generarIdMatricula(){
+    int id;
+    bool repetido;
+    do{
+        id = rand() % 90000 + 10000;
+        repetido = false;
+        for (int p = 0; p < universidad.programasCount && !repetido; p++){
+            for (int e = 0; e < universidad.programas[p].estudiantesCount && !repetido; e++){
+                Estudiante &est = universidad.programas[p].estudiantes[e];
+                for (int m = 0; m < est.matriculasCount; m++){
+                    if (est.matriculas[m].id == id){
+                        repetido = true;
+                        break;
+                    }
+                }
+            }
+        }
+    } while (repetido);
+    return id;
+}
+
+void agregarPrograma(int codigo, const char nombre[]){
+    if (buscarPrograma(codigo) != nullptr){
+        cout << "El programa con codigo " << codigo << " ya existe." << endl;
+        return;
+    }
+
+    Programa *nuevoArreglo = new Programa[universidad.programasCount + 1];
+    for (int i = 0; i < universidad.programasCount; i++){
+        nuevoArreglo[i] = universidad.programas[i];
+    }
+
+    nuevoArreglo[universidad.programasCount].codigo = codigo;
+    strcpy(nuevoArreglo[universidad.programasCount].nombre, nombre);
+    nuevoArreglo[universidad.programasCount].estudiantes = nullptr;
+    nuevoArreglo[universidad.programasCount].estudiantesCount = 0;
+
+    delete[] universidad.programas;
+    universidad.programas = nuevoArreglo;
+    universidad.programasCount++;
+
+    cout << "Programa creado correctamente. Codigo: " << codigo << endl;
+}
+
+void insertarEstudiante(Programa *programa, int id, const char nombre[], const char documento[], const char telefono[]){
+    Estudiante *nuevoArreglo = new Estudiante[programa->estudiantesCount + 1];
+    for (int i = 0; i < programa->estudiantesCount; i++){
+        nuevoArreglo[i] = programa->estudiantes[i];
+    }
+
+    nuevoArreglo[programa->estudiantesCount].id = id;
+    strcpy(nuevoArreglo[programa->estudiantesCount].nombre, nombre);
+    strcpy(nuevoArreglo[programa->estudiantesCount].documento, documento);
+    strcpy(nuevoArreglo[programa->estudiantesCount].telefono, telefono);
+    nuevoArreglo[programa->estudiantesCount].matriculas = nullptr;
+    nuevoArreglo[programa->estudiantesCount].matriculasCount = 0;
+
+    delete[] programa->estudiantes;
+    programa->estudiantes = nuevoArreglo;
+    programa->estudiantesCount++;
+}
+
+void agregarEstudiante(int codigoPrograma, const char nombre[], const char documento[], const char telefono[]){
+    Programa *programa = buscarPrograma(codigoPrograma);
+    if (programa == nullptr){
+        cout << "No existe un programa con codigo " << codigoPrograma << endl;
+        return;
+    }
+    if (buscarEstudiantePorDocumento(documento) != nullptr){
+        cout << "Ya existe un estudiante con el documento " << documento << endl;
+        return;
+    }
+
+    int nuevoId = generarIdEstudiante();
+    insertarEstudiante(programa, nuevoId, nombre, documento, telefono);
+
+    cout << "Estudiante creado correctamente. ID asignado: " << nuevoId << endl;
+}
+
+void insertarMatricula(Estudiante *estudiante, int id, const char codigoMateria[], const char nombreMateria[], Fecha fecha, float notas[3], float definitiva){
+    Matricula *nuevoArreglo = new Matricula[estudiante->matriculasCount + 1];
+    for (int i = 0; i < estudiante->matriculasCount; i++){
+        nuevoArreglo[i] = estudiante->matriculas[i];
+    }
+
+    nuevoArreglo[estudiante->matriculasCount].id = id;
+    strcpy(nuevoArreglo[estudiante->matriculasCount].codigoMateria, codigoMateria);
+    strcpy(nuevoArreglo[estudiante->matriculasCount].nombreMateria, nombreMateria);
+    for (int n = 0; n < 3; n++) nuevoArreglo[estudiante->matriculasCount].notas[n] = notas[n];
+    nuevoArreglo[estudiante->matriculasCount].definitiva = definitiva;
+    nuevoArreglo[estudiante->matriculasCount].fecha = fecha;
+
+    delete[] estudiante->matriculas;
+    estudiante->matriculas = nuevoArreglo;
+    estudiante->matriculasCount++;
+}
+
+void agregarMatricula(const char documentoEstudiante[], const char codigoMateria[], const char nombreMateria[], Fecha fecha, float notas[3]){
+    Estudiante *estudiante = buscarEstudiantePorDocumento(documentoEstudiante);
+    if (estudiante == nullptr){
+        cout << "No existe un estudiante con el documento " << documentoEstudiante << endl;
+        return;
+    }
+
+    for (int m = 0; m < estudiante->matriculasCount; m++){
+        if (strcmp(estudiante->matriculas[m].codigoMateria, codigoMateria) == 0){
+            cout << "La materia " << codigoMateria << " ya esta matriculada para este estudiante." << endl;
+            return;
+        }
+    }
+
+    for (int n = 0; n < 3; n++){
+        if (notas[n] < 0.0f || notas[n] > 5.0f){
+            cout << "Nota invalida: " << notas[n] << ". Debe estar entre 0.0 y 5.0." << endl;
+            return;
+        }
+    }
+
+    int nuevoId = generarIdMatricula();
+    float definitiva = (notas[0] + notas[1] + notas[2]) / 3.0f;
+
+    insertarMatricula(estudiante, nuevoId, codigoMateria, nombreMateria, fecha, notas, definitiva);
+
+    cout << "Matricula registrada correctamente. ID asignado: " << nuevoId << endl;
+}
+
+void cargaMasivaEstudiantes(){
+    ifstream archivo("estudiantes.csv");
+    if (!archivo.is_open()){
+        cout << "No se pudo abrir el archivo estudiantes.csv" << endl;
+        return;
+    }
+
+    char linea[200];
+    int importados = 0;
+
+    while (archivo.getline(linea, 200)){
+        if (strlen(linea) == 0) continue;
+
+        char *token = strtok(linea, ",");
+        int codigoPrograma = atoi(token);
+        token = strtok(nullptr, ",");
+        char nombrePrograma[50];
+        strcpy(nombrePrograma, token);
+        token = strtok(nullptr, ",");
+        int idEstudiante = atoi(token);
+        token = strtok(nullptr, ",");
+        char nombre[50];
+        strcpy(nombre, token);
+        token = strtok(nullptr, ",");
+        char documento[20];
+        strcpy(documento, token);
+        token = strtok(nullptr, ",");
+        char telefono[20];
+        strcpy(telefono, token);
+
+        Programa *programa = buscarPrograma(codigoPrograma);
+        if (programa == nullptr){
+            agregarPrograma(codigoPrograma, nombrePrograma);
+            programa = buscarPrograma(codigoPrograma);
+        }
+
+        if (buscarEstudiantePorDocumento(documento) != nullptr){
+            cout << "Documento " << documento << " ya existe, se omite." << endl;
+            continue;
+        }
+
+        insertarEstudiante(programa, idEstudiante, nombre, documento, telefono);
+        importados++;
+    }
+
+    archivo.close();
+    cout << "Carga masiva completada. Estudiantes importados: " << importados << endl;
+}
+
+void cargarUniversidad(){
+    ifstream archivoProgramas("programas.dat", ios::binary);
+    if (archivoProgramas.is_open()){
+        ProgramaDisco pd;
+        while (archivoProgramas.read((char*)&pd, sizeof(pd))){
+            agregarPrograma(pd.codigo, pd.nombre);
+        }
+        archivoProgramas.close();
+    }
+
+    ifstream archivoEstudiantes("estudiantes.dat", ios::binary);
+    if (archivoEstudiantes.is_open()){
+        EstudianteDisco ed;
+        while (archivoEstudiantes.read((char*)&ed, sizeof(ed))){
+            Programa *programa = buscarPrograma(ed.idPrograma);
+            if (programa != nullptr){
+                insertarEstudiante(programa, ed.id, ed.nombre, ed.documento, ed.telefono);
+            }
+        }
+        archivoEstudiantes.close();
+    }
+
+    ifstream archivoMatriculas("matriculas.dat", ios::binary);
+    if (archivoMatriculas.is_open()){
+        MatriculaDisco md;
+        while (archivoMatriculas.read((char*)&md, sizeof(md))){
+            Estudiante *estudiante = buscarEstudiantePorId(md.idEstudiante);
+            if (estudiante != nullptr){
+                insertarMatricula(estudiante, md.id, md.codigoMateria, md.nombreMateria, md.fecha, md.notas, md.definitiva);
+            }
+        }
+        archivoMatriculas.close();
+    }
+}
+
+void guardarUniversidad(){
+    remove("programas.dat");
+    remove("estudiantes.dat");
+    remove("matriculas.dat");
+
+    ofstream archivoProgramas("programas.dat", ios::binary);
+    ofstream archivoEstudiantes("estudiantes.dat", ios::binary);
+    ofstream archivoMatriculas("matriculas.dat", ios::binary);
+
+    for (int p = 0; p < universidad.programasCount; p++){
+        Programa &prog = universidad.programas[p];
+
+        ProgramaDisco pd;
+        pd.codigo = prog.codigo;
+        strcpy(pd.nombre, prog.nombre);
+        archivoProgramas.write((char*)&pd, sizeof(pd));
+
+        for (int e = 0; e < prog.estudiantesCount; e++){
+            Estudiante &est = prog.estudiantes[e];
+
+            EstudianteDisco ed;
+            ed.idPrograma = prog.codigo;
+            ed.id = est.id;
+            strcpy(ed.nombre, est.nombre);
+            strcpy(ed.documento, est.documento);
+            strcpy(ed.telefono, est.telefono);
+            archivoEstudiantes.write((char*)&ed, sizeof(ed));
+
+            for (int m = 0; m < est.matriculasCount; m++){
+                Matricula &mat = est.matriculas[m];
+
+                MatriculaDisco md;
+                md.idEstudiante = est.id;
+                md.id = mat.id;
+                strcpy(md.codigoMateria, mat.codigoMateria);
+                strcpy(md.nombreMateria, mat.nombreMateria);
+                for (int n = 0; n < 3; n++) md.notas[n] = mat.notas[n];
+                md.definitiva = mat.definitiva;
+                md.fecha = mat.fecha;
+                archivoMatriculas.write((char*)&md, sizeof(md));
+            }
+        }
+    }
+
+    archivoProgramas.close();
+    archivoEstudiantes.close();
+    archivoMatriculas.close();
+    cout << "Informacion guardada correctamente." << endl;
+}
+
+void liberarMemoria(){
+    for (int p = 0; p < universidad.programasCount; p++){
+        Programa &prog = universidad.programas[p];
+        for (int e = 0; e < prog.estudiantesCount; e++){
+            delete[] prog.estudiantes[e].matriculas;
+        }
+        delete[] prog.estudiantes;
+    }
+    delete[] universidad.programas;
+    universidad.programas = nullptr;
+    universidad.programasCount = 0;
+}
+
+void listarProgramas(){
+    cout << "\n===== Listado de programas =====" << endl;
+    if (universidad.programasCount == 0){
+        cout << "No hay programas registrados." << endl;
+        return;
+    }
+    for (int p = 0; p < universidad.programasCount; p++){
+        Programa &prog = universidad.programas[p];
+        cout << "Codigo: " << prog.codigo << " - Nombre: " << prog.nombre
+             << " - Estudiantes matriculados: " << prog.estudiantesCount << endl;
+    }
+}
+
+void listarEstudiantesPorProgramaMenu(){
+    int codigo;
+    cout << "Codigo del programa: ";
+    cin >> codigo;
+    cin.ignore();
+
+    Programa *programa = buscarPrograma(codigo);
+    if (programa == nullptr){
+        cout << "No existe un programa con codigo " << codigo << endl;
+        return;
+    }
+
+    cout << "\n===== Programa: " << programa->nombre << " (Codigo " << programa->codigo << ") =====" << endl;
+    cout << "Cantidad de estudiantes: " << programa->estudiantesCount << endl;
+    for (int e = 0; e < programa->estudiantesCount; e++){
+        Estudiante &est = programa->estudiantes[e];
+        cout << "  ID: " << est.id << " - Nombre: " << est.nombre
+             << " - Documento: " << est.documento << " - Telefono: " << est.telefono << endl;
+    }
+}
+
+void buscarEstudianteMenu(){
+    char documento[20];
+    cout << "Documento del estudiante: ";
+    cin.getline(documento, 20);
+
+    for (int p = 0; p < universidad.programasCount; p++){
+        Programa &prog = universidad.programas[p];
+        for (int e = 0; e < prog.estudiantesCount; e++){
+            Estudiante &est = prog.estudiantes[e];
+            if (strcmp(est.documento, documento) == 0){
+                cout << "\n===== Estudiante encontrado =====" << endl;
+                cout << "ID: " << est.id << endl;
+                cout << "Nombre: " << est.nombre << endl;
+                cout << "Documento: " << est.documento << endl;
+                cout << "Telefono: " << est.telefono << endl;
+                cout << "Programa: " << prog.nombre << " (Codigo " << prog.codigo << ")" << endl;
+
+                cout << "Materias matriculadas:" << endl;
+                float sumaDefinitivas = 0;
+                for (int m = 0; m < est.matriculasCount; m++){
+                    Matricula &mat = est.matriculas[m];
+                    cout << "  " << mat.codigoMateria << " - " << mat.nombreMateria
+                         << " - Definitiva: " << mat.definitiva << endl;
+                    sumaDefinitivas += mat.definitiva;
+                }
+
+                if (est.matriculasCount > 0){
+                    cout << "Promedio general: " << fixed << setprecision(2)
+                         << (sumaDefinitivas / est.matriculasCount) << endl;
+                } else {
+                    cout << "El estudiante aun no tiene materias matriculadas." << endl;
+                }
+                return;
+            }
+        }
+    }
+    cout << "No se encontro un estudiante con el documento " << documento << endl;
+}
+
+void mostrarHistorial(){
+    cout << "\n===== Historial academico =====" << endl;
+    for (int p = 0; p < universidad.programasCount; p++){
+        Programa &prog = universidad.programas[p];
+        cout << "Programa: " << prog.nombre << " (Codigo " << prog.codigo << ")" << endl;
+
+        for (int e = 0; e < prog.estudiantesCount; e++){
+            Estudiante &est = prog.estudiantes[e];
+            cout << "  Estudiante: " << est.nombre << " (Documento " << est.documento << ")" << endl;
+
+            for (int m = 0; m < est.matriculasCount; m++){
+                Matricula &mat = est.matriculas[m];
+                cout << "    Matricula: " << mat.codigoMateria << " - " << mat.nombreMateria
+                     << " - Definitiva: " << mat.definitiva << endl;
+            }
+        }
+    }
+}
+
+void generarReporteProgramas(){
+    ofstream archivo("programas.txt");
+    for (int p = 0; p < universidad.programasCount; p++){
+        Programa &prog = universidad.programas[p];
+        archivo << prog.codigo << "," << prog.nombre << "," << prog.estudiantesCount << endl;
+    }
+    archivo.close();
+    cout << "Reporte generado: programas.txt" << endl;
+}
+
+void generarReporteEstudiantes(){
+    ofstream archivo("estudiantes.txt");
+    for (int p = 0; p < universidad.programasCount; p++){
+        Programa &prog = universidad.programas[p];
+        for (int e = 0; e < prog.estudiantesCount; e++){
+            Estudiante &est = prog.estudiantes[e];
+            archivo << prog.nombre << "," << est.id << "," << est.nombre << ","
+                    << est.documento << "," << est.telefono << endl;
+        }
+    }
+    archivo.close();
+    cout << "Reporte generado: estudiantes.txt" << endl;
+}
+
+void generarReporteMatriculas(){
+    ofstream archivo("matriculas.txt");
+    archivo << fixed << setprecision(2);
+    for (int p = 0; p < universidad.programasCount; p++){
+        Programa &prog = universidad.programas[p];
+        for (int e = 0; e < prog.estudiantesCount; e++){
+            Estudiante &est = prog.estudiantes[e];
+            for (int m = 0; m < est.matriculasCount; m++){
+                Matricula &mat = est.matriculas[m];
+                archivo << prog.nombre << "," << est.nombre << "," << mat.codigoMateria << ","
+                        << mat.nombreMateria << "," << mat.definitiva << endl;
+            }
+        }
+    }
+    archivo.close();
+    cout << "Reporte generado: matriculas.txt" << endl;
+}
+
+void generarReportePromedios(){
+    ofstream archivo("reporte_promedios.txt");
+    archivo << "Programa,Documento,Estudiante,Promedio" << endl;
+
+    for (int p = 0; p < universidad.programasCount; p++){
+        Programa &prog = universidad.programas[p];
+        for (int e = 0; e < prog.estudiantesCount; e++){
+            Estudiante &est = prog.estudiantes[e];
+            if (est.matriculasCount == 0) continue;
+
+            float suma = 0;
+            for (int m = 0; m < est.matriculasCount; m++){
+                suma += est.matriculas[m].definitiva;
+            }
+            float promedio = suma / est.matriculasCount;
+
+            archivo << prog.nombre << "," << est.documento << "," << est.nombre << ","
+                    << fixed << setprecision(2) << promedio << endl;
+        }
+    }
+    archivo.close();
+    cout << "Reporte generado: reporte_promedios.txt" << endl;
+}
+
+void registrarProgramaMenu(){
+    int codigo;
+    char nombre[50];
+
+    cout << "Codigo del programa: ";
+    cin >> codigo;
+    cin.ignore();
+    cout << "Nombre del programa: ";
+    cin.getline(nombre, 50);
+
+    agregarPrograma(codigo, nombre);
+}
+
+void registrarEstudianteMenu(){
+    int codigoPrograma;
+    char nombre[50], documento[20], telefono[20];
+
+    cout << "Codigo del programa: ";
+    cin >> codigoPrograma;
+    cin.ignore();
+    cout << "Nombre: ";
+    cin.getline(nombre, 50);
+    cout << "Documento: ";
+    cin.getline(documento, 20);
+    cout << "Telefono: ";
+    cin.getline(telefono, 20);
+
+    agregarEstudiante(codigoPrograma, nombre, documento, telefono);
+}
+
+void registrarMatriculaMenu(){
+    char documento[20];
+    char codigoMateria[10], nombreMateria[40];
+    Fecha fecha;
+    float notas[3];
+
+    cout << "Documento del estudiante: ";
+    cin.getline(documento, 20);
+
+    cout << "Codigo de la materia: ";
+    cin >> codigoMateria;
+    cin.ignore();
+    cout << "Nombre de la materia: ";
+    cin.getline(nombreMateria, 40);
+
+    cout << "Fecha - Anio (aaaa): ";
+    cin >> fecha.anio;
+    cout << "Fecha - Mes (mm): ";
+    cin >> fecha.mes;
+    cout << "Fecha - Dia (dd): ";
+    cin >> fecha.dia;
+
+    for (int i = 0; i < 3; i++){
+        cout << "Nota " << (i + 1) << " (0.0 a 5.0): ";
+        cin >> notas[i];
+    }
+    cin.ignore();
+
+    agregarMatricula(documento, codigoMateria, nombreMateria, fecha, notas);
+}
+
+void mostrarMenu(){
+    cout << "\n======================================" << endl;
+    cout << " 1. Registrar programa" << endl;
+    cout << " 2. Registrar estudiante" << endl;
+    cout << " 3. Registrar matricula" << endl;
+    cout << " 5. Carga masiva de estudiantes" << endl;
+    cout << " 6. Listar programas" << endl;
+    cout << " 7. Listar estudiantes por programa" << endl;
+    cout << " 8. Buscar estudiante por documento" << endl;
+    cout << " 9. Mostrar historial academico" << endl;
+    cout << "10. Generar reporte de programas" << endl;
+    cout << "11. Generar reporte de estudiantes" << endl;
+    cout << "12. Generar reporte de matriculas" << endl;
+    cout << "13. Reporte de promedios" << endl;
+    cout << "14. Salir" << endl;
+    cout << "======================================" << endl;
+    cout << "Digite opcion: ";
+}
+
+int main(){
+    cargarUniversidad();
+    cout << fixed << setprecision(2);
+
+    int opcion;
+    do{
+        mostrarMenu();
+        cin >> opcion;
+        cin.ignore();
+
+        switch (opcion){
+            case 1: registrarProgramaMenu(); break;
+            case 2: registrarEstudianteMenu(); break;
+            case 3: registrarMatriculaMenu(); break;
+            case 5: cargaMasivaEstudiantes(); break;
+            case 6: listarProgramas(); break;
+            case 7: listarEstudiantesPorProgramaMenu(); break;
+            case 8: buscarEstudianteMenu(); break;
+            case 9: mostrarHistorial(); break;
+            case 10: generarReporteProgramas(); break;
+            case 11: generarReporteEstudiantes(); break;
+            case 12: generarReporteMatriculas(); break;
+            case 13: generarReportePromedios(); break;
+            case 14:
+                guardarUniversidad();
+                liberarMemoria();
+                cout << "Hasta luego." << endl;
+                break;
+            default:
+                cout << "Opcion invalida." << endl;
+        }
+    } while (opcion != 14);
+
+    return 0;
+}
