@@ -1,0 +1,69 @@
+Integrantes: Maria Fernanda Castañeda, Santiago Gaitan
+Grupo: 10
+
+PS C:\Users\santi\Downloads\src>  c:; cd 'c:\Users\santi\Downloads\src'; & 'C:\Users\santi\.vscode\extensions\redhat.java-1.57.0-win32-x64\jre\25.0.4.1-win32-x86_64\bin\java.exe' '-XX:+ShowCodeDetailsInExceptionMessages' '-cp' 'C:\Users\santi\AppData\Roaming\Code\User\workspaceStorage\7c5a72ea7e6eea549fe6d5646099d448\redhat.java\jdt_ws\src_125e3607\bin' 'Math' 
+Menu de opciones
+
+1. Area del circulo
+2. Circunferencia del circulo
+3. Area del triangulo
+4. Area de un cuadrilatero
+5. Salir
+1
+Area del circulo: 
+Indique el radio:
+5
+El area del circulo es: 78.5
+-----------------------------------
+Menu de opciones
+
+1. Area del circulo
+2. Circunferencia del circulo
+3. Area del triangulo
+4. Area de un cuadrilatero
+5. Salir
+2
+Circunferencia del circulo: 
+Indique el radio:
+5
+La circunferencia del circulo es: 31.4
+-----------------------------------
+Menu de opciones
+
+1. Area del circulo
+2. Circunferencia del circulo
+3. Area del triangulo
+4. Area de un cuadrilatero
+5. Salir
+3
+Area del triangulo: 
+Indique la base:
+4
+Indique la altura:
+3
+El area del trianguo es: 6.0
+-----------------------------------
+Menu de opciones
+
+1. Area del circulo
+2. Circunferencia del circulo
+3. Area del triangulo
+4. Area de un cuadrilatero
+5. Salir
+4
+Area del cuadrilater: 
+Indique lado 1:
+2,5
+Indique lado 2:
+4
+El area del cuadrilatero es: 10.0
+-----------------------------------
+Menu de opciones
+
+1. Area del circulo
+2. Circunferencia del circulo
+3. Area del triangulo
+4. Area de un cuadrilatero
+5. Salir
+5
+PS C:\Users\santi\Downloads\src>
